@@ -1,0 +1,2989 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mitra10 Pallet Logistics & Validation System</title>
+  
+  <!-- Tailwind CSS CDN (JIT Mode) -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  
+  <!-- Font Awesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
+  <!-- SweetAlert2 -->
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  
+  <!-- Google Fonts: Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <style>
+    body {
+      font-family: 'Inter', sans-serif;
+    }
+    /* Custom Scrollbar */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #f1f1f1;
+      border-radius: 4px;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #cbd5e1;
+      border-radius: 4px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #94a3b8;
+    }
+    .custom-shadow {
+      box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.05), 0 2px 8px -1px rgba(0, 0, 0, 0.03);
+    }
+  </style>
+</head>
+<body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col antialiased">
+
+  <!-- Splash / Loading Screen -->
+  <div id="splash-screen" class="fixed inset-0 z-[100] bg-slate-900 flex flex-col items-center justify-center text-white transition-all duration-500">
+    <div class="text-center">
+      <div class="inline-flex p-4 bg-orange-600 rounded-2xl mb-4 shadow-lg shadow-orange-600/30 animate-pulse">
+        <i class="fa-solid fa-boxes-stacked text-4xl text-white"></i>
+      </div>
+      <h1 class="text-2xl font-extrabold tracking-wider text-orange-500">MITRA10 LOGISTICS</h1>
+      <p class="text-xs text-slate-400 mt-2">Pallet Management & Validation Ecosystem</p>
+      <div class="mt-6 w-24 bg-slate-700 h-1.5 rounded-full overflow-hidden mx-auto">
+        <div class="bg-orange-500 h-full w-2/3 rounded-full animate-infinite animate-duration-1000"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- App Wrapper (Hidden on start, shown after init check / login) -->
+  <div id="app-wrapper" class="hidden flex-1 flex flex-col min-h-screen">
+    
+    <!-- Login Screen -->
+    <div id="login-section" class="flex-1 flex items-center justify-center px-4 py-12 bg-slate-900 relative overflow-hidden">
+      <!-- Background Shapes -->
+      <div class="absolute w-[500px] h-[500px] bg-orange-600/10 rounded-full blur-3xl -top-40 -left-40"></div>
+      <div class="absolute w-[400px] h-[400px] bg-amber-500/10 rounded-full blur-3xl -bottom-32 -right-32"></div>
+
+      <div class="w-full max-w-md bg-slate-800/80 backdrop-blur-md rounded-2xl p-8 border border-slate-700/50 shadow-2xl z-10">
+        <div class="text-center mb-8">
+          <div class="inline-flex p-3 bg-gradient-to-tr from-orange-500 to-amber-500 rounded-xl mb-3 shadow-lg shadow-orange-500/20">
+            <i class="fa-solid fa-cube text-2xl text-white"></i>
+          </div>
+          <h2 class="text-2xl font-bold text-white tracking-tight">Sign In Mitra10</h2>
+          <p class="text-sm text-slate-400 mt-1">Gunakan akun Logistik yang sudah terdaftar</p>
+        </div>
+
+        <form id="login-form" class="space-y-6">
+          <div>
+            <label class="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-2">Username / Email</label>
+            <div class="relative">
+              <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-slate-400">
+                <i class="fa-regular fa-envelope"></i>
+              </span>
+              <input type="email" id="login-email" required placeholder="Masukkan email atau username" 
+                class="w-full pl-10 pr-4 py-3 bg-slate-700/50 border border-slate-600 rounded-xl text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all">
+            </div>
+          </div>
+
+          <div>
+            <div class="flex justify-between items-center mb-2">
+              <label class="block text-xs font-semibold text-slate-300 uppercase tracking-wider">Password</label>
+            </div>
+            <div class="relative">
+              <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-slate-400">
+                <i class="fa-solid fa-lock"></i>
+              </span>
+              <input type="password" id="login-password" required placeholder="••••••••" 
+                class="w-full pl-10 pr-10 py-3 bg-slate-700/50 border border-slate-600 rounded-xl text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all">
+              <button type="button" onclick="togglePasswordVisibility()" class="absolute inset-y-0 right-0 flex items-center pr-3 text-slate-400 hover:text-white">
+                <i id="password-toggle-icon" class="fa-regular fa-eye"></i>
+              </button>
+            </div>
+          </div>
+
+          <button type="submit" id="btn-login"
+            class="w-full py-3 bg-gradient-to-r from-orange-600 to-amber-600 hover:from-orange-500 hover:to-amber-500 text-white font-semibold rounded-xl transition-all duration-200 transform hover:scale-[1.01] active:scale-[0.99] shadow-lg shadow-orange-600/20 flex items-center justify-center gap-2">
+            <span>Masuk Sistem</span>
+            <i class="fa-solid fa-arrow-right text-sm"></i>
+          </button>
+        </form>
+      </div>
+    </div>
+
+    <!-- Main Workspace Dashboard Section (Hidden by default, shown when logged-in) -->
+    <div id="dashboard-section" class="hidden flex-1 flex relative overflow-hidden">
+      
+      <!-- Sidebar Menu -->
+      <aside id="sidebar-menu" class="fixed inset-y-0 left-0 z-50 w-72 bg-slate-900 text-slate-300 flex flex-col border-r border-slate-800 transition-transform duration-300 ease-in-out transform -translate-x-full lg:translate-x-0">
+        
+        <!-- Sidebar Brand Header -->
+        <div class="h-16 flex items-center justify-between px-6 border-b border-slate-800 bg-slate-950">
+          <div class="flex items-center gap-3">
+            <i class="fa-solid fa-boxes-packing text-orange-500 text-xl"></i>
+            <div>
+              <span class="font-extrabold text-white text-base tracking-wide">MITRA10</span>
+              <span class="block text-[9px] font-medium tracking-widest text-slate-400 uppercase">Logistic Hub v2.6</span>
+            </div>
+          </div>
+          <!-- Close Sidebar Button (for mobile only) -->
+          <button onclick="toggleSidebar(false)" class="lg:hidden text-slate-400 hover:text-white transition-colors">
+            <i class="fa-solid fa-xmark text-lg"></i>
+          </button>
+        </div>
+
+        <!-- Sidebar Navigation Menu -->
+        <nav class="flex-1 px-4 py-6 space-y-1.5 overflow-y-auto">
+          <p class="px-3 text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-2">OPERATIONAL FLOW</p>
+          
+          <button onclick="switchMenu('VALIDASI_AWAL')" id="menu-validasi_awal"
+            class="w-full flex items-center justify-between px-3 py-3 rounded-xl text-sm font-medium transition-all group duration-150">
+            <div class="flex items-center gap-3">
+              <span class="w-8 h-8 rounded-lg flex items-center justify-center bg-slate-800 text-slate-400 group-hover:bg-orange-500/10 group-hover:text-orange-500 transition-colors">
+                <i class="fa-solid fa-clipboard-check text-sm"></i>
+              </span>
+              <span>Validasi Awal</span>
+            </div>
+            <span class="menu-badge bg-orange-600 text-white text-[10px] font-bold px-2 py-0.5 rounded-full" id="badge-validasi_awal">0</span>
+          </button>
+
+          <button onclick="switchMenu('BERJALAN')" id="menu-berjalan"
+            class="w-full flex items-center justify-between px-3 py-3 rounded-xl text-sm font-medium transition-all group duration-150">
+            <div class="flex items-center gap-3">
+              <span class="w-8 h-8 rounded-lg flex items-center justify-center bg-slate-800 text-slate-400 group-hover:bg-sky-500/10 group-hover:text-sky-400 transition-colors">
+                <i class="fa-solid fa-truck-ramp-box text-sm"></i>
+              </span>
+              <span>Berjalan</span>
+            </div>
+            <span class="menu-badge bg-sky-600 text-white text-[10px] font-bold px-2 py-0.5 rounded-full" id="badge-berjalan">0</span>
+          </button>
+
+          <button onclick="switchMenu('ASURANSI')" id="menu-asuransi"
+            class="w-full flex items-center justify-between px-3 py-3 rounded-xl text-sm font-medium transition-all group duration-150">
+            <div class="flex items-center gap-3">
+              <span class="w-8 h-8 rounded-lg flex items-center justify-center bg-slate-800 text-slate-400 group-hover:bg-amber-500/10 group-hover:text-amber-500 transition-colors">
+                <i class="fa-solid fa-shield-halved text-sm"></i>
+              </span>
+              <span>Asuransi</span>
+            </div>
+            <span class="menu-badge bg-amber-600 text-white text-[10px] font-bold px-2 py-0.5 rounded-full" id="badge-asuransi">0</span>
+          </button>
+
+          <button onclick="switchMenu('BANDING_JNE')" id="menu-banding_jne"
+            class="w-full flex items-center justify-between px-3 py-3 rounded-xl text-sm font-medium transition-all group duration-150">
+            <div class="flex items-center gap-3">
+              <span class="w-8 h-8 rounded-lg flex items-center justify-center bg-slate-800 text-slate-400 group-hover:bg-purple-500/10 group-hover:text-purple-400 transition-colors">
+                <i class="fa-solid fa-scale-balanced text-sm"></i>
+              </span>
+              <span>Banding JNE</span>
+            </div>
+            <span class="menu-badge bg-purple-600 text-white text-[10px] font-bold px-2 py-0.5 rounded-full" id="badge-banding_jne">0</span>
+          </button>
+
+          <button onclick="switchMenu('FISIK_BAGUS')" id="menu-fisik_bagus"
+            class="w-full flex items-center justify-between px-3 py-3 rounded-xl text-sm font-medium transition-all group duration-150">
+            <div class="flex items-center gap-3">
+              <span class="w-8 h-8 rounded-lg flex items-center justify-center bg-slate-800 text-slate-400 group-hover:bg-emerald-500/10 group-hover:text-emerald-400 transition-colors">
+                <i class="fa-solid fa-box text-sm"></i>
+              </span>
+              <span>Fisik Bagus</span>
+            </div>
+            <span class="menu-badge bg-emerald-600 text-white text-[10px] font-bold px-2 py-0.5 rounded-full" id="badge-fisik_bagus">0</span>
+          </button>
+
+          <button onclick="switchMenu('BREAKAGE')" id="menu-breakage"
+            class="w-full flex items-center justify-between px-3 py-3 rounded-xl text-sm font-medium transition-all group duration-150">
+            <div class="flex items-center gap-3">
+              <span class="w-8 h-8 rounded-lg flex items-center justify-center bg-slate-800 text-slate-400 group-hover:bg-rose-500/10 group-hover:text-rose-400 transition-colors">
+                <i class="fa-solid fa-burst text-sm"></i>
+              </span>
+              <span>Breakage</span>
+            </div>
+            <span class="menu-badge bg-rose-600 text-white text-[10px] font-bold px-2 py-0.5 rounded-full" id="badge-breakage">0</span>
+          </button>
+
+          <p class="px-3 text-[10px] font-bold text-slate-500 uppercase tracking-widest mt-6 mb-2">SYSTEM RECORDS</p>
+          
+          <button onclick="switchMenu('LOG_HISTORY')" id="menu-log_history"
+            class="w-full flex items-center justify-between px-3 py-3 rounded-xl text-sm font-medium transition-all group duration-150">
+            <div class="flex items-center gap-3">
+              <span class="w-8 h-8 rounded-lg flex items-center justify-center bg-slate-800 text-slate-400 group-hover:bg-indigo-500/10 group-hover:text-indigo-400 transition-colors">
+                <i class="fa-solid fa-clock-rotate-left text-sm"></i>
+              </span>
+              <span>Log History</span>
+            </div>
+          </button>
+        </nav>
+
+        <!-- Sidebar Footer Action -->
+        <div class="p-4 border-t border-slate-800 bg-slate-950">
+          <div class="flex items-center gap-3 px-2 mb-4">
+            <div class="w-9 h-9 rounded-full bg-orange-600 flex items-center justify-center text-white font-bold text-sm shadow">
+              <i class="fa-solid fa-user-tie"></i>
+            </div>
+            <div class="overflow-hidden">
+              <h4 id="user-display-name" class="text-sm font-semibold text-white truncate">Administrator</h4>
+              <p id="user-display-email" class="text-xs text-slate-500 truncate"> </p>
+            </div>
+          </div>
+          <button onclick="triggerLogout()" 
+            class="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-rose-600 hover:bg-rose-500 text-white text-sm font-semibold rounded-xl transition-colors shadow-lg shadow-rose-600/10">
+            <i class="fa-solid fa-right-from-bracket"></i>
+            <span>Log Out</span>
+          </button>
+        </div>
+      </aside>
+
+      <!-- Overlay for Mobile Sidebar -->
+      <div id="sidebar-overlay" onclick="toggleSidebar(false)" class="fixed inset-0 z-40 bg-slate-950/40 backdrop-blur-sm lg:hidden hidden"></div>
+
+      <!-- Main Panel View -->
+      <main class="flex-1 flex flex-col lg:pl-72 min-w-0 transition-all duration-300">
+        
+        <!-- Top Sticky Header -->
+        <header class="h-16 border-b border-slate-200 bg-white/80 backdrop-blur-md sticky top-0 z-30 flex items-center justify-between px-4 sm:px-6">
+          <div class="flex items-center gap-3">
+            <!-- Sidebar Trigger (for mobile) -->
+            <button onclick="toggleSidebar(true)" class="lg:hidden p-2 text-slate-500 hover:text-slate-800 hover:bg-slate-100 rounded-lg transition-all">
+              <i class="fa-solid fa-bars text-lg"></i>
+            </button>
+            <h1 id="main-header-title" class="text-lg font-bold text-slate-900 tracking-tight flex items-center gap-2">
+              <i class="fa-solid fa-clipboard-check text-orange-600"></i>
+              <span>Validasi Awal</span>
+            </h1>
+          </div>
+          
+          <div class="flex items-center gap-4">
+            <!-- Live Badge Indicator -->
+            <div class="hidden sm:flex items-center gap-2 px-3 py-1 bg-emerald-50 text-emerald-700 rounded-full text-xs font-semibold">
+              <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-ping"></span>
+              <span>Database Connected</span>
+            </div>
+            <!-- Sync Data Button -->
+            <button onclick="fetchAllData()" class="p-2 text-slate-500 hover:text-slate-800 hover:bg-slate-100 rounded-full transition-all" title="Refresh Data">
+              <i class="fa-solid fa-rotate text-sm"></i>
+            </button>
+          </div>
+        </header>
+
+        <!-- Dynamic Page Workspace -->
+        <div class="flex-1 p-4 sm:p-6 overflow-y-auto max-w-7xl w-full mx-auto space-y-6">
+          
+          <!-- Tab Panel: OPERATIONAL TABLES (Shared layout for VALIDASI_AWAL, BERJALAN, ASURANSI, BANDING_JNE, FISIK_BAGUS, BREAKAGE) -->
+          <div id="panel-table-view" class="space-y-6">
+            
+            <!-- Context Control Card -->
+            <div class="bg-white rounded-2xl p-4 sm:p-5 border border-slate-200/80 shadow-sm flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+              <div>
+                <p class="text-xs font-semibold text-slate-400 uppercase tracking-widest">Total Data Tersedia</p>
+                <h3 class="text-2xl font-bold text-slate-900 mt-1" id="pallet-data-count">0 Palet</h3>
+              </div>
+              <div class="flex items-center gap-3">
+                <!-- Add Button: Hanya untuk VALIDASI_AWAL -->
+                <button id="btn-add-pallet" onclick="openNewPalletModal()"
+                  class="px-5 py-3 bg-gradient-to-r from-orange-600 to-amber-600 hover:from-orange-500 hover:to-amber-500 text-white font-semibold rounded-xl text-sm transition-all duration-200 transform hover:scale-[1.02] shadow-md shadow-orange-600/10 flex items-center gap-2">
+                  <i class="fa-solid fa-plus text-xs"></i>
+                  <span>Buat Palet Baru</span>
+                </button>
+              </div>
+            </div>
+
+            <!-- Table Card Container -->
+            <div class="bg-white rounded-2xl border border-slate-200/80 shadow-sm overflow-hidden">
+              <div class="overflow-x-auto w-full">
+                <table class="w-full text-left border-collapse">
+                  <thead>
+                    <tr class="bg-slate-50 border-b border-slate-200 text-xs font-bold text-slate-500 uppercase tracking-wider">
+                      <th class="py-4 px-6">Tanggal Buat</th>
+                      <th class="py-4 px-6">Nama Palet</th>
+                      <th class="py-4 px-6 text-center">Total Resi</th>
+                      <th class="py-4 px-6 text-center">Total Item No</th>
+                      <th class="py-4 px-6 text-center">Total Qty Vol</th>
+                      <th class="py-4 px-6">Status Alur</th>
+                      <th class="py-4 px-6 text-center">Aksi</th>
+                    </tr>
+                  </thead>
+                  <tbody id="pallet-table-body" class="divide-y divide-slate-100 text-sm font-medium text-slate-700">
+                    <!-- Dynamic Table Rows -->
+                  </tbody>
+                </table>
+              </div>
+              
+              <!-- Empty State -->
+              <div id="table-empty-state" class="hidden p-12 text-center">
+                <div class="inline-flex p-4 bg-slate-50 rounded-2xl text-slate-400 mb-3">
+                  <i class="fa-regular fa-folder-open text-3xl"></i>
+                </div>
+                <h4 class="text-base font-bold text-slate-800">Tidak Ada Data Palet</h4>
+                <p class="text-xs text-slate-500 mt-1">Belum ada palet yang terdaftar atau dipindahkan ke menu ini.</p>
+              </div>
+            </div>
+
+          </div>
+
+          <!-- Tab Panel: LOG HISTORY VIEW -->
+          <div id="panel-log-view" class="hidden space-y-6">
+            
+            <!-- Log Filter -->
+            <div class="bg-white rounded-2xl p-4 sm:p-5 border border-slate-200/80 shadow-sm flex flex-col md:flex-row gap-4 items-center justify-between">
+              <div class="relative w-full md:max-w-md">
+                <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-slate-400">
+                  <i class="fa-solid fa-magnifying-glass text-sm"></i>
+                </span>
+                <input type="text" id="log-search-input" onkeyup="filterAuditLogs()" placeholder="Cari resi / user / palet..." 
+                  class="w-full pl-10 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all">
+              </div>
+              <div class="text-right w-full md:w-auto">
+                <p class="text-xs font-semibold text-slate-400 uppercase tracking-widest">Total Aktivitas Tercatat</p>
+                <h3 class="text-lg font-bold text-slate-900 mt-1" id="log-count-display">0 Log</h3>
+              </div>
+            </div>
+
+            <!-- Log Cards Feed -->
+            <div id="log-feed-container" class="space-y-4">
+              <!-- Dynamic Log Cards -->
+            </div>
+
+            <!-- Log Empty State -->
+            <div id="log-empty-state" class="hidden p-12 text-center bg-white rounded-2xl border border-slate-200">
+              <div class="inline-flex p-4 bg-slate-50 rounded-2xl text-slate-400 mb-3">
+                <i class="fa-solid fa-list-check text-3xl"></i>
+              </div>
+              <h4 class="text-base font-bold text-slate-800">Log History Kosong</h4>
+              <p class="text-xs text-slate-500 mt-1">Belum ada aktivitas perpindahan atau validasi yang tercatat.</p>
+            </div>
+
+          </div>
+
+        </div>
+      </main>
+
+    </div>
+
+  </div>
+
+  <!-- ============================================== -->
+  <!-- MODALS SECTION: ADD/EDIT VALIDASI AWAL DRAFT -->
+  <!-- ============================================== -->
+  <div id="modal-pallet-packer" class="fixed inset-0 z-50 overflow-y-auto hidden">
+    <div class="flex items-center justify-center min-h-screen px-4 py-8 relative">
+      <!-- Backdrop -->
+      <div class="fixed inset-0 bg-slate-950/50 backdrop-blur-sm transition-opacity" onclick="closePalletPackerModal()"></div>
+      
+      <!-- Content Panel -->
+      <div class="bg-white w-full max-w-4xl rounded-2xl shadow-2xl relative z-10 border border-slate-200/80 overflow-hidden flex flex-col">
+        <!-- Modal Header -->
+        <div class="bg-slate-900 px-6 py-4 flex items-center justify-between text-white">
+          <div class="flex items-center gap-3">
+            <span class="p-2 bg-orange-600 rounded-lg text-sm">
+              <i class="fa-solid fa-boxes-stacked"></i>
+            </span>
+            <div>
+              <h3 class="font-bold text-base tracking-tight" id="packer-modal-title">DETAIL PALET</h3>
+              <p class="text-[10px] text-slate-400 uppercase tracking-widest mt-0.5">Packer Validation Phase</p>
+            </div>
+          </div>
+          <button onclick="closePalletPackerModal()" class="text-slate-400 hover:text-white transition-colors">
+            <i class="fa-solid fa-xmark text-lg"></i>
+          </button>
+        </div>
+
+        <div class="p-6 overflow-y-auto max-h-[75vh] space-y-6">
+          <!-- Metadata Info Row -->
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4 bg-slate-50 p-4 rounded-xl border border-slate-200/60">
+            <div>
+              <label class="text-xs font-bold text-slate-400 uppercase tracking-wider">Date Created</label>
+              <input type="text" id="packer-date" readonly class="w-full mt-1 bg-white border border-slate-200 rounded-lg px-3 py-2 text-sm text-slate-700 font-semibold focus:outline-none cursor-not-allowed">
+            </div>
+            <div>
+              <label class="text-xs font-bold text-slate-400 uppercase tracking-wider">No Palet</label>
+              <input type="text" id="packer-pallet-name" readonly class="w-full mt-1 bg-white border border-slate-200 rounded-lg px-3 py-2 text-sm text-orange-600 font-extrabold focus:outline-none cursor-not-allowed">
+            </div>
+          </div>
+
+          <!-- Resi Block Containers -->
+          <div class="space-y-4">
+            <div class="flex items-center justify-between border-b border-slate-200 pb-2">
+              <h4 class="text-xs font-extrabold text-slate-800 uppercase tracking-widest flex items-center gap-2">
+                <i class="fa-solid fa-receipt text-orange-500"></i>
+                <span>Resi Block Containers</span>
+              </h4>
+              <button onclick="addResiBlockContainer()" id="btn-add-resi-container"
+                class="px-3 py-1.5 bg-orange-50 hover:bg-orange-100 text-orange-700 rounded-lg text-xs font-bold transition-all flex items-center gap-1">
+                <i class="fa-solid fa-plus-circle text-xs"></i>
+                <span>Add Container</span>
+              </button>
+            </div>
+
+            <div id="resi-containers-list" class="space-y-4">
+              <!-- Dynamically Appended Resi Containers -->
+            </div>
+          </div>
+        </div>
+
+        <!-- Modal Footer Actions -->
+        <div class="px-6 py-4 bg-slate-50 border-t border-slate-200 flex flex-wrap gap-3 items-center justify-between">
+          <button onclick="closePalletPackerModal()" class="px-5 py-2.5 bg-white hover:bg-slate-100 border border-slate-200 rounded-xl text-sm font-semibold text-slate-600 transition-all flex items-center gap-2">
+            <i class="fa-solid fa-xmark"></i>
+            <span>BATAL</span>
+          </button>
+          
+          <div class="flex gap-3">
+            <button onclick="savePalletPacker(true)" id="btn-save-draft" class="px-5 py-2.5 bg-slate-800 hover:bg-slate-700 text-white rounded-xl text-sm font-semibold transition-all flex items-center gap-2">
+              <i class="fa-solid fa-floppy-disk"></i>
+              <span>SIMPAN (DRAFT)</span>
+            </button>
+            <button onclick="savePalletPacker(false)" id="btn-validate-packer" class="px-5 py-2.5 bg-gradient-to-r from-orange-600 to-amber-600 hover:from-orange-500 hover:to-amber-500 text-white rounded-xl text-sm font-semibold transition-all flex items-center gap-2 shadow-lg shadow-orange-600/10">
+              <i class="fa-solid fa-clipboard-check"></i>
+              <span>VALIDATE PACKER</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================== -->
+  <!-- MODALS SECTION: VALIDATE ADMIN POPUP           -->
+  <!-- ============================================== -->
+  <div id="modal-pallet-admin" class="fixed inset-0 z-50 overflow-y-auto hidden">
+    <div class="flex items-center justify-center min-h-screen px-4 py-8 relative">
+      <div class="fixed inset-0 bg-slate-950/50 backdrop-blur-sm transition-opacity" onclick="closePalletAdminModal()"></div>
+      
+      <div class="bg-white w-full max-w-4xl rounded-2xl shadow-2xl relative z-10 border border-slate-200/80 overflow-hidden flex flex-col">
+        <!-- Header -->
+        <div class="bg-slate-900 px-6 py-4 flex items-center justify-between text-white">
+          <div class="flex items-center gap-3">
+            <span class="p-2 bg-indigo-600 rounded-lg text-sm">
+              <i class="fa-solid fa-user-gear"></i>
+            </span>
+            <div>
+              <h3 class="font-bold text-base tracking-tight">VALIDATE ADMIN</h3>
+              <p class="text-[10px] text-slate-400 uppercase tracking-widest mt-0.5">Admin Validation & Item Detail Phase</p>
+            </div>
+          </div>
+          <button onclick="closePalletAdminModal()" class="text-slate-400 hover:text-white transition-colors">
+            <i class="fa-solid fa-xmark text-lg"></i>
+          </button>
+        </div>
+
+        <!-- Body -->
+        <div class="p-6 overflow-y-auto max-h-[75vh] space-y-6">
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4 bg-slate-50 p-4 rounded-xl border border-slate-200/60">
+            <div>
+              <span class="text-xs font-bold text-slate-400 uppercase tracking-wider">Date Created</span>
+              <p id="admin-date-display" class="mt-1 text-sm text-slate-700 font-semibold">-</p>
+            </div>
+            <div>
+              <span class="text-xs font-bold text-slate-400 uppercase tracking-wider">No Palet</span>
+              <p id="admin-pallet-display" class="mt-1 text-sm text-indigo-600 font-extrabold">-</p>
+            </div>
+          </div>
+
+          <!-- Dynamic Resi Containers to be filled with detailed administration metrics -->
+          <div id="admin-resi-list" class="space-y-6">
+            <!-- Programmatically injected based on current resi rows -->
+          </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="px-6 py-4 bg-slate-50 border-t border-slate-200 flex flex-wrap gap-3 items-center justify-between">
+          <button onclick="closePalletAdminModal()" class="px-5 py-2.5 bg-white hover:bg-slate-100 border border-slate-200 rounded-xl text-sm font-semibold text-slate-600 transition-all">
+            <span>BATAL</span>
+          </button>
+          
+          <div class="flex gap-3">
+            <button onclick="savePalletAdmin(true)" class="px-5 py-2.5 bg-slate-800 hover:bg-slate-700 text-white rounded-xl text-sm font-semibold transition-all">
+              <span>SIMPAN (DRAFT)</span>
+            </button>
+            <button onclick="savePalletAdmin(false)" class="px-5 py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-sm font-semibold transition-all shadow-lg shadow-indigo-600/15">
+              <span>VALIDATE ADMIN</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================== -->
+  <!-- MODALS SECTION: VALIDATED ADMIN VIEW & ACTION  -->
+  <!-- ============================================== -->
+  <div id="modal-validated-admin-view" class="fixed inset-0 z-50 overflow-y-auto hidden">
+    <div class="flex items-center justify-center min-h-screen px-4 py-8 relative">
+      <div class="fixed inset-0 bg-slate-950/50 backdrop-blur-sm transition-opacity" onclick="closeValidatedAdminViewModal()"></div>
+      
+      <div class="bg-white w-full max-w-4xl rounded-2xl shadow-2xl relative z-10 border border-slate-200/80 overflow-hidden flex flex-col">
+        <!-- Header -->
+        <div class="bg-slate-900 px-6 py-4 flex items-center justify-between text-white">
+          <div class="flex items-center gap-3">
+            <span class="p-2 bg-emerald-600 rounded-lg text-sm">
+              <i class="fa-solid fa-circle-check"></i>
+            </span>
+            <div>
+              <h3 class="font-bold text-base tracking-tight">VALIDATE ADMIN</h3>
+              <p class="text-[10px] text-slate-400 uppercase tracking-widest mt-0.5">Verified Pallet Details</p>
+            </div>
+          </div>
+          <button onclick="closeValidatedAdminViewModal()" class="text-slate-400 hover:text-white transition-colors">
+            <i class="fa-solid fa-xmark text-lg"></i>
+          </button>
+        </div>
+
+        <!-- Body -->
+        <div id="validated-view-body" class="p-6 overflow-y-auto max-h-[70vh] space-y-6">
+          <!-- Populated in JS: contains container block cards, scrolling horizontal tables, and Trigger Pindah Palet -->
+        </div>
+
+        <!-- Footer -->
+        <div class="px-6 py-4 bg-slate-50 border-t border-slate-200 flex justify-end">
+          <button onclick="closeValidatedAdminViewModal()" class="px-5 py-2.5 bg-slate-800 hover:bg-slate-700 text-white rounded-xl text-sm font-semibold transition-all">
+            <span>Tutup</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================== -->
+  <!-- MODALS SECTION: DESTINATION MENU SELECTION    -->
+  <!-- ============================================== -->
+  <div id="modal-pindah-menu" class="fixed inset-0 z-50 overflow-y-auto hidden">
+    <div class="flex items-center justify-center min-h-screen px-4 py-8 relative">
+      <div class="fixed inset-0 bg-slate-950/50 backdrop-blur-sm transition-opacity" onclick="closePindahMenuModal()"></div>
+      
+      <div class="bg-white w-full max-w-md rounded-2xl shadow-2xl relative z-10 border border-slate-200/80 overflow-hidden">
+        <!-- Header -->
+        <div class="bg-slate-900 px-6 py-4 flex items-center justify-between text-white">
+          <h3 class="font-bold text-base tracking-tight" id="pindah-menu-header-title">PINDAH MENU</h3>
+          <button onclick="closePindahMenuModal()" class="text-slate-400 hover:text-white transition-colors">
+            <i class="fa-solid fa-xmark text-lg"></i>
+          </button>
+        </div>
+
+        <!-- Body -->
+        <div class="p-6 space-y-4">
+          <p class="text-xs font-semibold text-slate-400 uppercase tracking-wider text-center">Pilih Menu Tujuan Perpindahan Resi</p>
+          
+          <div id="pindah-menu-buttons-grid" class="grid grid-cols-1 gap-2.5">
+            <!-- Injected buttons dynamically (depending on source menu restrictions) -->
+          </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="px-6 py-4 bg-slate-50 border-t border-slate-200 flex justify-end">
+          <button onclick="closePindahMenuModal()" class="px-4 py-2 bg-slate-200 hover:bg-slate-300 rounded-lg text-xs font-bold text-slate-700 transition-colors">
+            <span>CANCEL</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================== -->
+  <!-- MODALS SECTION: CHOOSE PALLET OPTION (NEW / EXISTING) -->
+  <!-- ============================================== -->
+  <div id="modal-pallet-option" class="fixed inset-0 z-50 overflow-y-auto hidden">
+    <div class="flex items-center justify-center min-h-screen px-4 py-8 relative">
+      <div class="fixed inset-0 bg-slate-950/50 backdrop-blur-sm transition-opacity" onclick="closePalletOptionModal()"></div>
+      
+      <div class="bg-white w-full max-w-md rounded-2xl shadow-2xl relative z-10 border border-slate-200/80 overflow-hidden">
+        <div class="bg-slate-900 px-6 py-4 text-white flex justify-between items-center">
+          <h3 class="font-bold text-base tracking-tight">CHOOSE PALLET OPTION</h3>
+          <button onclick="closePalletOptionModal()" class="text-slate-400 hover:text-white transition-colors">
+            <i class="fa-solid fa-xmark text-lg"></i>
+          </button>
+        </div>
+
+        <div class="p-6 space-y-4">
+          <p class="text-xs font-semibold text-slate-400 uppercase tracking-wider text-center">Metode Pengelompokan Palet Tujuan</p>
+          
+          <!-- Horizontal Layout -->
+          <div class="grid grid-cols-2 gap-4">
+            <button onclick="selectPalletOption('NEW')" class="flex flex-col items-center justify-center p-5 bg-orange-50 hover:bg-orange-100/80 border border-orange-200 rounded-2xl transition-all text-center group">
+              <span class="w-12 h-12 bg-orange-600 text-white rounded-full flex items-center justify-center text-xl mb-3 shadow shadow-orange-600/10 group-hover:scale-110 transition-transform">
+                <i class="fa-solid fa-circle-plus"></i>
+              </span>
+              <span class="font-bold text-sm text-orange-950">NEW</span>
+              <span class="text-[10px] text-orange-700 mt-1">Bikin Palet Baru</span>
+            </button>
+
+            <button onclick="selectPalletOption('EXISTING')" class="flex flex-col items-center justify-center p-5 bg-slate-50 hover:bg-slate-100 border border-slate-200 rounded-2xl transition-all text-center group">
+              <span class="w-12 h-12 bg-slate-800 text-white rounded-full flex items-center justify-center text-xl mb-3 shadow group-hover:scale-110 transition-transform">
+                <i class="fa-solid fa-list-ul"></i>
+              </span>
+              <span class="font-bold text-sm text-slate-900">EXISTING</span>
+              <span class="text-[10px] text-slate-600 mt-1">Gabung Palet Ada</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================== -->
+  <!-- MODALS SECTION: CREATE NEW PALLET / EXISTING OPTION -->
+  <!-- ============================================== -->
+  <div id="modal-pindah-execute" class="fixed inset-0 z-50 overflow-y-auto hidden">
+    <div class="flex items-center justify-center min-h-screen px-4 py-8 relative">
+      <div class="fixed inset-0 bg-slate-950/50 backdrop-blur-sm transition-opacity" onclick="closePindahExecuteModal()"></div>
+      
+      <div class="bg-white w-full max-w-md rounded-2xl shadow-2xl relative z-10 border border-slate-200/80 overflow-hidden">
+        <div class="bg-slate-900 px-6 py-4 text-white flex justify-between items-center">
+          <h3 class="font-bold text-base tracking-tight" id="pindah-execute-title">PROSES PERPINDAHAN</h3>
+          <button onclick="closePindahExecuteModal()" class="text-slate-400 hover:text-white transition-colors">
+            <i class="fa-solid fa-xmark text-lg"></i>
+          </button>
+        </div>
+
+        <div class="p-6 space-y-4">
+          <!-- Target Menu ReadOnly Indicator -->
+          <div>
+            <label class="text-[10px] font-bold text-slate-400 uppercase tracking-widest block mb-1">Target Menu</label>
+            <div id="pindah-execute-menu-readonly" class="bg-slate-100 border border-slate-200 rounded-xl px-4 py-3 font-bold text-sm text-slate-800 uppercase">
+              BERJALAN 1 (Read Only)
+            </div>
+          </div>
+
+          <!-- Existing Pallet Selector Form (Hanya jika opsi EXISTING dipilih) -->
+          <div id="pindah-execute-existing-container" class="hidden">
+            <label class="text-[10px] font-bold text-slate-400 uppercase tracking-widest block mb-1">Pilih Palet Terdaftar</label>
+            <select id="pindah-execute-select-pallet" class="w-full bg-white border border-slate-200 rounded-xl px-3 py-2.5 text-sm font-semibold text-slate-800 focus:outline-none focus:ring-2 focus:ring-orange-500">
+              <!-- Dynamic options -->
+            </select>
+          </div>
+          
+          <div class="text-xs text-slate-500 leading-relaxed bg-amber-50 p-3 rounded-xl border border-amber-100">
+            <i class="fa-solid fa-triangle-exclamation text-amber-600 mr-1"></i>
+            Aksi ini akan mengeluarkan baris resi terpilih dari palet asal, memindahkannya, dan membuat riwayat log aktivitas logistik secara otomatis.
+          </div>
+        </div>
+
+        <div class="px-6 py-4 bg-slate-50 border-t border-slate-200 flex justify-between">
+          <button onclick="closePindahExecuteModal()" class="px-5 py-2.5 bg-white hover:bg-slate-100 border border-slate-200 rounded-xl text-sm font-semibold text-slate-600">
+            <span>BATAL</span>
+          </button>
+          <button onclick="executePindahPaletFinal()" class="px-5 py-2.5 bg-orange-600 hover:bg-orange-500 text-white rounded-xl text-sm font-semibold shadow shadow-orange-600/15">
+            <span>PROSES</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================== -->
+  <!-- MODALS SECTION: MULTI-STEP MENU DETAIL VIEW modals -->
+  <!-- ============================================== -->
+  <div id="modal-generic-detail-flow" class="fixed inset-0 z-40 overflow-y-auto hidden">
+    <div class="flex items-center justify-center min-h-screen px-4 py-8 relative">
+      <div class="fixed inset-0 bg-slate-950/50 backdrop-blur-sm transition-opacity" onclick="closeGenericDetailModal()"></div>
+      
+      <div class="bg-white w-full max-w-4xl rounded-2xl shadow-2xl relative z-10 border border-slate-200/80 overflow-hidden flex flex-col">
+        <!-- Dynamic Header -->
+        <div id="flow-header-bg" class="bg-slate-900 px-6 py-4 text-white flex justify-between items-center">
+          <div class="flex items-center gap-3">
+            <span id="flow-header-icon-container" class="p-2 rounded-lg text-sm bg-sky-600">
+              <i id="flow-header-icon" class="fa-solid fa-box"></i>
+            </span>
+            <div>
+              <h3 id="flow-header-title" class="font-bold text-base tracking-tight">Detail Resi & Validasi Alur</h3>
+              <p id="flow-header-subtitle" class="text-[10px] text-slate-400 uppercase tracking-widest mt-0.5">Sub-Menu Detail View</p>
+            </div>
+          </div>
+          <button onclick="closeGenericDetailModal()" class="text-slate-400 hover:text-white transition-colors">
+            <i class="fa-solid fa-xmark text-lg"></i>
+          </button>
+        </div>
+
+        <!-- Body -->
+        <div id="flow-modal-body" class="p-6 overflow-y-auto max-h-[72vh] space-y-6">
+          <!-- Dynamic Form Injected below based on the current active menu flow -->
+        </div>
+
+        <!-- Footer -->
+        <div id="flow-modal-footer" class="px-6 py-4 bg-slate-50 border-t border-slate-200 flex flex-wrap gap-3 items-center justify-between">
+          <!-- Dynamic Buttons injected here -->
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================== -->
+  <!-- MODAL: ADD NEW PALLET BASE VALIDASI AWAL      -->
+  <!-- ============================================== -->
+  <div id="modal-new-pallet-setup" class="fixed inset-0 z-50 overflow-y-auto hidden">
+    <div class="flex items-center justify-center min-h-screen px-4 py-8 relative">
+      <div class="fixed inset-0 bg-slate-950/50 backdrop-blur-sm transition-opacity" onclick="closeNewPalletModal()"></div>
+      
+      <div class="bg-white w-full max-w-md rounded-2xl shadow-2xl relative z-10 border border-slate-200/80 overflow-hidden">
+        <div class="bg-slate-900 px-6 py-4 text-white flex justify-between items-center">
+          <h3 class="font-bold text-base tracking-tight">BUAT PALET BARU</h3>
+          <button onclick="closeNewPalletModal()" class="text-slate-400 hover:text-white transition-colors">
+            <i class="fa-solid fa-xmark text-lg"></i>
+          </button>
+        </div>
+
+        <div class="p-6 space-y-4">
+          <div>
+            <label class="text-[10px] font-bold text-slate-400 uppercase tracking-widest block mb-1">Pallet Number (Automatic Counter)</label>
+            <input type="text" id="new-pallet-computed-name" readonly class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 font-extrabold text-sm text-orange-600 focus:outline-none cursor-not-allowed">
+            <p class="text-[10px] text-slate-400 mt-1">Sistem mendeteksi slot kosong atau melanjutkan urutan nomor.</p>
+          </div>
+        </div>
+
+        <div class="px-6 py-4 bg-slate-50 border-t border-slate-200 flex justify-between">
+          <button onclick="closeNewPalletModal()" class="px-4 py-2.5 bg-white hover:bg-slate-100 border border-slate-200 rounded-xl text-sm font-semibold text-slate-600">
+            <span>BATAL</span>
+          </button>
+          <button onclick="createNewPalletSubmit()" class="px-5 py-2.5 bg-orange-600 hover:bg-orange-500 text-white rounded-xl text-sm font-semibold shadow shadow-orange-600/15">
+            <span>PROSES</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- ============================================================== -->
+  <!-- JAVASCRIPT APPLICATION CORE LOGIC (INTEGRATED WITH SUPABASE)   -->
+  <!-- ============================================================== -->
+  <script>
+    // --- SUPABASE CONFIGURATION ---
+    const SUPABASE_URL = "https://jgxekmpyigfwhycbgomr.supabase.co";
+    const ANON_SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpneGVrbXB5aWdmd2h5Y2Jnb21yIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI0NTMxODEsImV4cCI6MjA5ODAyOTE4MX0.vmOA80Nk89Sxob5rmRDUuqwk9jDFxNdHfgUAs1LQNBc";
+
+    // Application state
+    let currentUser = null;
+    let activeMenu = "VALIDASI_AWAL"; // VALIDASI_AWAL, BERJALAN, ASURANSI, BANDING_JNE, FISIK_BAGUS, BREAKAGE, LOG_HISTORY
+    
+    // InMemory caching
+    let localPallets = [];
+    let localResiItems = [];
+    let localResiDetails = [];
+    let localAuditLogs = [];
+
+    // Current operating states for modal chains
+    let editingPalletId = null;
+    let selectedResiItemForPindah = null; // resi_item object when transferring
+    let selectedTargetMenuForPindah = null; // target menu code
+    let selectedTransferType = null; // 'NEW' or 'EXISTING'
+
+    // REST Headers helper
+    function getHeaders() {
+      const headers = {
+        "apikey": ANON_SUPABASE_KEY,
+        "Content-Type": "application/json",
+        "Prefer": "return=representation"
+      };
+      if (currentUser && currentUser.access_token) {
+        headers["Authorization"] = `Bearer ${currentUser.access_token}`;
+      }
+      return headers;
+    }
+
+    // --- INITIALIZATION ---
+    window.onload = async function() {
+      // Short delay for splash visual
+      setTimeout(async () => {
+        checkPersistedSession();
+        document.getElementById("splash-screen").classList.add("opacity-0", "pointer-events-none");
+        document.getElementById("app-wrapper").classList.remove("hidden");
+      }, 1200);
+    };
+
+    // --- SECURE SESSION CONTROLLER ---
+    function checkPersistedSession() {
+      const savedUser = localStorage.getItem("mitra10_session_user");
+      if (savedUser) {
+        currentUser = JSON.parse(savedUser);
+        showDashboard();
+      } else {
+        showLogin();
+      }
+    }
+
+    function showLogin() {
+      document.getElementById("login-section").classList.remove("hidden");
+      document.getElementById("dashboard-section").classList.add("hidden");
+    }
+
+    function showDashboard() {
+      document.getElementById("login-section").classList.add("hidden");
+      document.getElementById("dashboard-section").classList.remove("hidden");
+      
+      // Update User Information UI
+      document.getElementById("user-display-name").textContent = currentUser.email.split("@")[0].toUpperCase();
+      document.getElementById("user-display-email").textContent = currentUser.email;
+
+      // Sync menu and fetch initial payload
+      switchMenu(activeMenu);
+    }
+
+    function togglePasswordVisibility() {
+      const pwdInput = document.getElementById("login-password");
+      const pwdIcon = document.getElementById("password-toggle-icon");
+      if (pwdInput.type === "password") {
+        pwdInput.type = "text";
+        pwdIcon.classList.remove("fa-eye");
+        pwdIcon.classList.add("fa-eye-slash");
+      } else {
+        pwdInput.type = "password";
+        pwdIcon.classList.remove("fa-eye-slash");
+        pwdIcon.classList.add("fa-eye");
+      }
+    }
+
+    // --- SUPABASE AUTH API INTEGRATION ---
+    document.getElementById("login-form").addEventListener("submit", async function(e) {
+      e.preventDefault();
+      
+      const email = document.getElementById("login-email").value.trim();
+      const password = document.getElementById("login-password").value;
+      const btn = document.getElementById("btn-login");
+
+      // Visual validation loading states
+      btn.disabled = true;
+      btn.innerHTML = `<i class="fa-solid fa-spinner animate-spin"></i> <span>Mengecek Kredensial...</span>`;
+
+      try {
+        const response = await fetch(`${SUPABASE_URL}/auth/v1/token?grant_type=password`, {
+          method: "POST",
+          headers: {
+            "apikey": ANON_SUPABASE_KEY,
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({ email, password })
+        });
+
+        if (!response.ok) {
+          throw new Error("Kombinasi email dan password logistik Anda salah.");
+        }
+
+        const data = await response.json();
+        currentUser = {
+          email: data.user.email,
+          uid: data.user.id,
+          access_token: data.access_token
+        };
+
+        localStorage.setItem("mitra10_session_user", JSON.stringify(currentUser));
+        
+        Swal.fire({
+          icon: 'success',
+          title: 'Login Berhasil',
+          text: `Selamat datang, ${currentUser.email}!`,
+          timer: 1500,
+          showConfirmButton: false
+        });
+
+        showDashboard();
+
+      } catch (err) {
+        Swal.fire({
+          icon: 'error',
+          title: 'Akses Ditolak',
+          text: err.message || "Gagal menghubungkan ke Server Supabase."
+        });
+      } finally {
+        btn.disabled = false;
+        btn.innerHTML = `<span>Masuk Sistem</span> <i class="fa-solid fa-arrow-right text-sm"></i>`;
+      }
+    });
+
+    function triggerLogout() {
+      Swal.fire({
+        title: 'Konfirmasi Keluar',
+        text: "Anda akan keluar dari sistem logistik Mitra10.",
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#e06900',
+        cancelButtonColor: '#64748b',
+        confirmButtonText: 'Ya, Logout',
+        cancelButtonText: 'Batal'
+      }).then((result) => {
+        if (result.isConfirmed) {
+          localStorage.removeItem("mitra10_session_user");
+          currentUser = null;
+          showLogin();
+        }
+      });
+    }
+
+    // --- NAVIGATION AND MENU SWITCHES ---
+    function switchMenu(menuCode) {
+      activeMenu = menuCode;
+
+      // Update sidebar state
+      const menus = ["VALIDASI_AWAL", "BERJALAN", "ASURANSI", "BANDING_JNE", "FISIK_BAGUS", "BREAKAGE", "LOG_HISTORY"];
+      menus.forEach(m => {
+        const el = document.getElementById(`menu-${m.toLowerCase()}`);
+        if (el) {
+          if (m === menuCode) {
+            el.className = "w-full flex items-center justify-between px-3 py-3 rounded-xl text-sm font-bold bg-orange-600 text-white shadow-md shadow-orange-600/10 group transition-all duration-150";
+            // change inner span bg
+            const innerSpan = el.querySelector("span.w-8");
+            if (innerSpan) innerSpan.className = "w-8 h-8 rounded-lg flex items-center justify-center bg-white/20 text-white transition-colors";
+          } else {
+            el.className = "w-full flex items-center justify-between px-3 py-3 rounded-xl text-sm font-medium hover:bg-slate-800 text-slate-300 hover:text-white group transition-all duration-150";
+            const innerSpan = el.querySelector("span.w-8");
+            if (innerSpan) innerSpan.className = "w-8 h-8 rounded-lg flex items-center justify-center bg-slate-800 text-slate-400 group-hover:bg-orange-500/10 group-hover:text-orange-500 transition-colors";
+          }
+        }
+      });
+
+      // Header modification
+      const headerTitle = document.getElementById("main-header-title");
+      let headerText = menuCode.replace("_", " ");
+      let iconHtml = `<i class="fa-solid fa-clipboard-check text-orange-600"></i>`;
+      
+      if (menuCode === "BERJALAN") iconHtml = `<i class="fa-solid fa-truck-ramp-box text-sky-500"></i>`;
+      else if (menuCode === "ASURANSI") iconHtml = `<i class="fa-solid fa-shield-halved text-amber-500"></i>`;
+      else if (menuCode === "BANDING_JNE") iconHtml = `<i class="fa-solid fa-scale-balanced text-purple-500"></i>`;
+      else if (menuCode === "FISIK_BAGUS") iconHtml = `<i class="fa-solid fa-box text-emerald-500"></i>`;
+      else if (menuCode === "BREAKAGE") iconHtml = `<i class="fa-solid fa-burst text-rose-500"></i>`;
+      else if (menuCode === "LOG_HISTORY") iconHtml = `<i class="fa-solid fa-clock-rotate-left text-indigo-500"></i>`;
+
+      headerTitle.innerHTML = `${iconHtml} <span class="capitalize">${headerText.toLowerCase()}</span>`;
+
+      // Panel Visibility switcher
+      if (menuCode === "LOG_HISTORY") {
+        document.getElementById("panel-table-view").classList.add("hidden");
+        document.getElementById("panel-log-view").classList.remove("hidden");
+      } else {
+        document.getElementById("panel-table-view").classList.remove("hidden");
+        document.getElementById("panel-log-view").classList.add("hidden");
+        
+        // Atur Button "Buat Palet Baru" agar hanya muncul di VALIDASI_AWAL
+        const btnAdd = document.getElementById("btn-add-pallet");
+        if (menuCode === "VALIDASI_AWAL") {
+          btnAdd.classList.remove("hidden");
+        } else {
+          btnAdd.classList.add("hidden");
+        }
+      }
+
+      // Sync data from database
+      fetchAllData();
+      toggleSidebar(false);
+    }
+
+    function toggleSidebar(open) {
+      const sidebar = document.getElementById("sidebar-menu");
+      const overlay = document.getElementById("sidebar-overlay");
+      if (open) {
+        sidebar.classList.remove("-translate-x-full");
+        overlay.classList.remove("hidden");
+      } else {
+        sidebar.classList.add("-translate-x-full");
+        overlay.classList.add("hidden");
+      }
+    }
+
+    // --- DATA FETCHER INTEGRATED TO SUPABASE VIA REST API ---
+    async function fetchAllData() {
+      if (!currentUser) return;
+
+      try {
+        // Fetch Pallets
+        const resPallets = await fetch(`${SUPABASE_URL}/rest/v1/pallets?select=*&order=id.asc`, {
+          headers: getHeaders()
+        });
+        if (resPallets.ok) localPallets = await resPallets.json();
+
+        // Fetch Resi Items
+        const resResi = await fetch(`${SUPABASE_URL}/rest/v1/resi_items?select=*`, {
+          headers: getHeaders()
+        });
+        if (resResi.ok) localResiItems = await resResi.json();
+
+        // Fetch Resi Details (Items inside sub-tables)
+        const resDetails = await fetch(`${SUPABASE_URL}/rest/v1/resi_details?select=*`, {
+          headers: getHeaders()
+        });
+        if (resDetails.ok) localResiDetails = await resDetails.json();
+
+        // Fetch Logs
+        const resLogs = await fetch(`${SUPABASE_URL}/rest/v1/audit_logs?select=*&order=date_activity.desc`, {
+          headers: getHeaders()
+        });
+        if (resLogs.ok) localAuditLogs = await resLogs.json();
+
+        // Update counts badges
+        updateBadgeCounters();
+
+        // Render current active layout
+        if (activeMenu === "LOG_HISTORY") {
+          renderAuditLogs();
+        } else {
+          renderPalletsTable();
+        }
+
+      } catch (err) {
+        console.error("Error fetching database tables:", err);
+      }
+    }
+
+    function updateBadgeCounters() {
+      // Grouping dynamic calculations
+      const menus = ["VALIDASI_AWAL", "BERJALAN", "ASURANSI", "BANDING_JNE", "FISIK_BAGUS", "BREAKAGE"];
+      menus.forEach(m => {
+        const badge = document.getElementById(`badge-${m.toLowerCase()}`);
+        if (badge) {
+          const count = localPallets.filter(p => p.menu_type === m).length;
+          badge.textContent = count;
+          if (count === 0) {
+            badge.classList.add("opacity-0");
+          } else {
+            badge.classList.remove("opacity-0");
+          }
+        }
+      });
+    }
+
+    // --- RENDER LOG HISTORY VIEW ---
+    function renderAuditLogs() {
+      const container = document.getElementById("log-feed-container");
+      const emptyState = document.getElementById("log-empty-state");
+      
+      container.innerHTML = "";
+      
+      if (localAuditLogs.length === 0) {
+        emptyState.classList.remove("hidden");
+        document.getElementById("log-count-display").textContent = "0 Log";
+        return;
+      }
+      emptyState.classList.add("hidden");
+      document.getElementById("log-count-display").textContent = `${localAuditLogs.length} Log`;
+
+      localAuditLogs.forEach(log => {
+        const dateFormatted = new Date(log.date_activity).toLocaleString('id-ID', {
+          day: '2-digit', month: '2-digit', year: 'numeric',
+          hour: '2-digit', minute: '2-digit'
+        });
+
+        const card = document.createElement("div");
+        card.className = "bg-white p-5 rounded-2xl border border-slate-200/80 shadow-sm space-y-4 hover:shadow-md transition-shadow";
+        card.innerHTML = `
+          <div class="flex items-center justify-between border-b border-slate-100 pb-2.5">
+            <div class="flex items-center gap-2">
+              <span class="text-slate-400"><i class="fa-solid fa-clock-rotate-left"></i></span>
+              <span class="text-xs font-bold text-slate-500">${dateFormatted}</span>
+            </div>
+            <div class="flex items-center gap-1.5 px-2.5 py-1 bg-slate-100 rounded-full text-xs font-bold text-slate-700">
+              <i class="fa-solid fa-circle-user text-[10px]"></i>
+              <span>${log.username || 'System'}</span>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 text-xs font-semibold">
+            <div>
+              <p class="text-[10px] text-slate-400 uppercase tracking-wider mb-0.5">Resi Balik</p>
+              <p class="text-slate-800 font-bold">${log.resi_balik || '-'}</p>
+            </div>
+            <div>
+              <p class="text-[10px] text-slate-400 uppercase tracking-wider mb-0.5">Resi Kirim</p>
+              <p class="text-slate-800 font-bold">${log.resi_kirim || '-'}</p>
+            </div>
+            <div>
+              <p class="text-[10px] text-slate-400 uppercase tracking-wider mb-0.5">No Order</p>
+              <p class="text-slate-800 font-bold">${log.no_order || '-'}</p>
+            </div>
+            <div>
+              <p class="text-[10px] text-slate-400 uppercase tracking-wider mb-0.5">Item / Qty</p>
+              <p class="text-slate-800 font-bold">${log.no_item || '-'} (${log.qty || 0} pcs)</p>
+            </div>
+          </div>
+
+          <div class="pt-3 border-t border-slate-100 grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">[ Aliran Palet ]</p>
+              <div class="flex items-center gap-2 text-xs font-bold text-slate-700">
+                <span class="px-2 py-1 bg-slate-100 rounded border border-slate-200">${log.from_pallet || 'Unassigned'}</span>
+                <i class="fa-solid fa-arrow-right-long text-slate-400"></i>
+                <span class="px-2 py-1 bg-orange-50 text-orange-700 rounded border border-orange-200 font-bold">${log.to_pallet || 'Target'}</span>
+              </div>
+            </div>
+            
+            <div>
+              <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">[ Atribut Administrasi ]</p>
+              <div class="grid grid-cols-3 gap-1 text-[10px] font-bold text-slate-600 bg-slate-50 p-2 rounded-lg border border-slate-200/50">
+                <div>SOR: <span class="text-slate-800">${log.no_sor || '-'}</span></div>
+                <div>PSI: <span class="text-slate-800">${log.no_psi || '-'}</span></div>
+                <div>PSORT: <span class="text-slate-800">${log.no_psort || '-'}</span></div>
+                <div>Kitting: <span class="text-slate-800">${log.kitting || '-'}</span></div>
+                <div>Loc: <span class="text-slate-800">${log.no_location || '-'}</span></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="pt-3 border-t border-slate-100 flex items-start gap-2.5 bg-slate-50 p-3 rounded-xl">
+            <span class="px-2 py-0.5 rounded text-[9px] font-bold uppercase bg-orange-600 text-white mt-0.5">${log.status || 'LOG'}</span>
+            <div>
+              <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-0.5">Remarks</p>
+              <p class="text-xs text-slate-600 italic leading-relaxed">"${log.remarks || 'Tidak ada catatan tambahan.'}"</p>
+            </div>
+          </div>
+        `;
+        container.appendChild(card);
+      });
+    }
+
+    function filterAuditLogs() {
+      const q = document.getElementById("log-search-input").value.toLowerCase();
+      const cards = document.getElementById("log-feed-container").children;
+      let visibleCount = 0;
+      
+      Array.from(cards).forEach(card => {
+        if (card.textContent.toLowerCase().includes(q)) {
+          card.classList.remove("hidden");
+          visibleCount++;
+        } else {
+          card.classList.add("hidden");
+        }
+      });
+      document.getElementById("log-count-display").textContent = `${visibleCount} Log`;
+    }
+
+    // --- RENDER PALLETS MAIN TABLE ---
+    function renderPalletsTable() {
+      const body = document.getElementById("pallet-table-body");
+      const emptyState = document.getElementById("table-empty-state");
+      
+      body.innerHTML = "";
+      
+      const activePallets = localPallets.filter(p => p.menu_type === activeMenu);
+      
+      if (activePallets.length === 0) {
+        emptyState.classList.remove("hidden");
+        document.getElementById("pallet-data-count").textContent = `0 Palet`;
+        return;
+      }
+      emptyState.classList.add("hidden");
+      document.getElementById("pallet-data-count").textContent = `${activePallets.length} Palet`;
+
+      activePallets.forEach(pallet => {
+        // Calculate totals dynamically using related cached records
+        const resis = localResiItems.filter(r => r.pallet_id === pallet.id);
+        const totalResis = resis.length;
+        
+        let totalItemsCount = 0;
+        let totalQtyVolume = 0;
+
+        resis.forEach(r => {
+          const details = localResiDetails.filter(d => d.resi_item_id === r.id);
+          totalItemsCount += details.length;
+          details.forEach(d => {
+            totalQtyVolume += (d.qty || 0);
+          });
+        });
+
+        const dateCreated = new Date(pallet.created_at).toLocaleDateString('id-ID', {
+          day: '2-digit', month: '2-digit', year: 'numeric'
+        });
+
+        // Determine Status Color Theme Badge
+        let statusBadgeClass = "bg-slate-100 text-slate-700";
+        if (pallet.status === "Validate Packer") statusBadgeClass = "bg-orange-500 text-white";
+        else if (pallet.status === "Validate Admin") statusBadgeClass = "bg-indigo-600 text-white";
+        else if (pallet.status === "Ready Pickup") statusBadgeClass = "bg-amber-500 text-white";
+        else if (pallet.status === "Done Pickup") statusBadgeClass = "bg-teal-600 text-white";
+        else if (pallet.status === "Done Return") statusBadgeClass = "bg-emerald-500 text-white";
+        else if (pallet.status === "Done Balik Lokasi") statusBadgeClass = "bg-green-600 text-white";
+        else if (pallet.status === "Breakage") statusBadgeClass = "bg-rose-500 text-white";
+        else if (pallet.status === "Done Pemusnahan") statusBadgeClass = "bg-rose-900 text-white";
+
+        const tr = document.createElement("tr");
+        tr.className = "hover:bg-slate-50/80 transition-colors cursor-pointer";
+        
+        // Klik pada seluruh baris kecuali tombol hapus
+        tr.onclick = function(e) {
+          if (e.target.closest('button')) return;
+          onPalletRowClicked(pallet);
+        };
+
+        tr.innerHTML = `
+          <td class="py-4 px-6 font-medium text-slate-500">${dateCreated}</td>
+          <td class="py-4 px-6 text-slate-900 font-extrabold tracking-tight">${pallet.pallet_name}</td>
+          <td class="py-4 px-6 text-center font-bold text-slate-800">${totalResis}</td>
+          <td class="py-4 px-6 text-center font-bold text-slate-800">${totalItemsCount}</td>
+          <td class="py-4 px-6 text-center font-bold text-orange-600">${totalQtyVolume}</td>
+          <td class="py-4 px-6">
+            <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-bold leading-none ${statusBadgeClass}">
+              ${pallet.status}
+            </span>
+          </td>
+          <td class="py-4 px-6 text-center">
+            <button onclick="deletePallet(${pallet.id}, '${pallet.pallet_name}')" 
+              class="w-8 h-8 rounded-lg bg-rose-50 hover:bg-rose-100 text-rose-600 transition-colors flex items-center justify-center mx-auto" title="Hapus Palet">
+              <i class="fa-regular fa-trash-can text-sm"></i>
+            </button>
+          </td>
+        `;
+        body.appendChild(tr);
+      });
+    }
+
+    // --- AUTO NUMBER PALLET SEQUENCING (C1-Cxx) ---
+    async function determineNextPalletName(menu) {
+      console.log(`[LOCK SYSTEM] Menghitung nama palet otomatis untuk menu: ${menu}`);
+      
+      if (menu === "VALIDASI_AWAL") {
+        // Logika untuk Validasi Awal (C1, C2, dst) tetap sama seperti kodemu
+        let slot = 1;
+        while (true) {
+          const name = `C${slot}`;
+          const exists = localPallets.some(p => p.pallet_name === name && p.menu_type === "VALIDASI_AWAL");
+          if (!exists) return name;
+          slot++;
+        }
+      } else {
+        // --- UNTUK MENU LAIN (ASURANSI, BERJALAN, DSB) ---
+        // Cari semua palet di menu tersebut
+        const menuPallets = localPallets.filter(p => p.menu_type === menu);
+        
+        if (menuPallets.length === 0) {
+          return `${menu} 1`;
+        }
+
+        // Ambil angka counter terbesar dari nama palet yang ada
+        let maxNum = 0;
+        menuPallets.forEach(p => {
+          const match = p.pallet_name.match(/\d+$/);
+          if (match) {
+            const num = parseInt(match[0]);
+            if (num > maxNum) maxNum = num;
+          }
+        });
+
+        // Cek status dari palet dengan nomor terbesar tersebut
+        const latestPallet = menuPallets.find(p => p.pallet_name === `${menu} ${maxNum}`);
+        
+        // JIKA palet nomor terbesar tersebut statusnya sudah "Ready Pickup", 
+        // MAKA nomor urutan harus dipaksa naik (+1) ke nomor berikutnya!
+        if (latestPallet && latestPallet.status === "Ready Pickup") {
+          console.log(`[LOCK SYSTEM] Palet ${latestPallet.pallet_name} berstatus Ready Pickup (Terkunci). Menaikkan counter ke urutan berikutnya.`);
+          return `${menu} ${maxNum + 1}`;
+        }
+
+        // Jika belum "Ready Pickup", bisa gunakan nomor yang sudah ada atau sesuai logika bawaanmu
+        return `${menu} ${maxNum}`;
+      }
+    }
+
+    // --- CREATE NEW PALLET TRIGGER ---
+    async function openNewPalletModal() {
+      const computedName = await determineNextPalletName("VALIDASI_AWAL");
+      document.getElementById("new-pallet-computed-name").value = computedName;
+      document.getElementById("modal-new-pallet-setup").classList.remove("hidden");
+    }
+
+    function closeNewPalletModal() {
+      document.getElementById("modal-new-pallet-setup").classList.add("hidden");
+    }
+
+    async function createNewPalletSubmit() {
+      const name = document.getElementById("new-pallet-computed-name").value;
+      
+      try {
+        const response = await fetch(`${SUPABASE_URL}/rest/v1/pallets`, {
+          method: "POST",
+          headers: getHeaders(),
+          body: JSON.stringify({
+            pallet_name: name,
+            menu_type: "VALIDASI_AWAL",
+            status: "Belum Validasi"
+          })
+        });
+
+        if (!response.ok) throw new Error("Gagal menyimpan palet ke Supabase.");
+
+        closeNewPalletModal();
+        
+        Swal.fire({
+          icon: 'success',
+          title: 'Palet Dibuat',
+          text: `Palet ${name} berhasil didaftarkan di Validasi Awal.`,
+          timer: 1500,
+          showConfirmButton: false
+        });
+
+        fetchAllData();
+
+      } catch (err) {
+        Swal.fire({
+          icon: 'error',
+          title: 'Gagal',
+          text: err.message
+        });
+      }
+    }
+
+    // --- DELETE PALLET AND CASCADE RESIS ---
+    function deletePallet(palletId, palletName) {
+      Swal.fire({
+        title: 'Hapus Palet?',
+        text: `Semua data resi dan sub-item di dalam Palet ${palletName} akan dihapus permanen!`,
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#e11d48',
+        cancelButtonColor: '#64748b',
+        confirmButtonText: 'Ya, Hapus Semua',
+        cancelButtonText: 'Batal'
+      }).then(async (result) => {
+        if (result.isConfirmed) {
+          try {
+            const response = await fetch(`${SUPABASE_URL}/rest/v1/pallets?id=eq.${palletId}`, {
+              method: "DELETE",
+              headers: getHeaders()
+            });
+
+            if (!response.ok) throw new Error("Gagal menghapus palet dari database.");
+
+            Swal.fire({
+              icon: 'success',
+              title: 'Dihapus',
+              text: 'Data palet berhasil dibersihkan.',
+              timer: 1200,
+              showConfirmButton: false
+            });
+
+            fetchAllData();
+
+          } catch (err) {
+            Swal.fire({
+              icon: 'error',
+              title: 'Gagal',
+              text: err.message
+            });
+          }
+        }
+      });
+    }
+
+    // --- MAIN ROUTER: ROW CLICKED HANDLER ---
+    function onPalletRowClicked(pallet) {
+      editingPalletId = pallet.id;
+      
+      if (pallet.menu_type === "VALIDASI_AWAL") {
+        if (pallet.status === "Belum Validasi") {
+          openPalletPackerModal(pallet);
+        } else if (pallet.status === "Validate Packer") {
+          openPalletAdminModal(pallet);
+        } else if (pallet.status === "Validate Admin") {
+          openValidatedAdminViewModal(pallet);
+        }
+      } else {
+        // Menu spesifik (BERJALAN, ASURANSI, BANDING_JNE, FISIK_BAGUS, BREAKAGE)
+        openGenericFlowModal(pallet);
+      }
+    }
+
+    // ==============================================================
+    // PACKER MODAL LOGER (VALIDASI AWAL - DRAFT)
+    // ==============================================================
+    async function openPalletPackerModal(pallet) {
+      document.getElementById("packer-modal-title").textContent = `DETAIL PALET : ${pallet.pallet_name}`;
+      
+      const dateString = new Date(pallet.created_at).toLocaleDateString('id-ID', {
+        day: '2-digit', month: '2-digit', year: 'numeric'
+      });
+      document.getElementById("packer-date").value = dateString;
+      document.getElementById("packer-pallet-name").value = pallet.pallet_name;
+
+      // Reset list
+      const listContainer = document.getElementById("resi-containers-list");
+      listContainer.innerHTML = "";
+
+      // Fetch existing resi items in this pallet
+      const relatedResis = localResiItems.filter(r => r.pallet_id === pallet.id);
+      
+      if (relatedResis.length === 0) {
+        // Add one default row container
+        addResiBlockContainer();
+      } else {
+        relatedResis.forEach(resi => {
+          addResiBlockContainer(resi);
+        });
+      }
+
+      document.getElementById("modal-pallet-packer").classList.remove("hidden");
+    }
+
+    function closePalletPackerModal() {
+      document.getElementById("modal-pallet-packer").classList.add("hidden");
+    }
+
+    let resiBlockCounter = 0;
+    function addResiBlockContainer(existingData = null) {
+      resiBlockCounter++;
+      const idCode = `resi-block-${resiBlockCounter}`;
+      
+      const container = document.getElementById("resi-containers-list");
+      const block = document.createElement("div");
+      block.className = "bg-white p-5 rounded-xl border border-slate-200 shadow-sm relative space-y-4";
+      block.id = idCode;
+
+      // Extract existing data fields if available
+      const typeSelected = existingData ? (existingData.resi_balik ? "RESI_BALIK" : "RESI_KIRIM") : "RESI_KIRIM";
+      const resiValue = existingData ? (existingData.resi_balik || existingData.resi_kirim || "") : "";
+      
+      // Get detail info (item count, qty, notes)
+      let relatedDetails = [];
+      if (existingData) {
+        relatedDetails = localResiDetails.filter(d => d.resi_item_id === existingData.id);
+      }
+      const totalItemCount = relatedDetails.length || (existingData ? 1 : 1);
+      
+      // Hitung sum Qty
+      let sumQty = 0;
+      relatedDetails.forEach(d => sumQty += (d.qty || 0));
+      if (sumQty === 0 && existingData) sumQty = 1; // fallback
+      if (!existingData) sumQty = 5; // default sesuai sketsa
+
+      const notes = existingData ? (existingData.feedback || "") : " ";
+
+      block.innerHTML = `
+        <!-- Block Title Header -->
+        <div class="flex items-center justify-between border-b border-slate-100 pb-2">
+          <span class="text-xs font-bold text-orange-600 uppercase tracking-widest bg-orange-50 px-2.5 py-1 rounded">
+            BLOCK CONTAINER #${container.children.length + 1}
+          </span>
+          <button onclick="removeResiBlockContainer('${idCode}')" class="text-rose-600 hover:text-rose-800 transition-colors">
+            <i class="fa-regular fa-trash-can"></i>
+          </button>
+        </div>
+
+        <!-- Inputs Grid -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <label class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Tipe Resi</label>
+            <select class="resi-type w-full mt-1 bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-xs font-bold focus:outline-none focus:ring-2 focus:ring-orange-500">
+              <option value="RESI_KIRIM" ${typeSelected === "RESI_KIRIM" ? "selected" : ""}>RESI KIRIM</option>
+              <option value="RESI_BALIK" ${typeSelected === "RESI_BALIK" ? "selected" : ""}>RESI BALIK</option>
+            </select>
+          </div>
+          <div>
+            <label class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">No Resi</label>
+            <div class="relative mt-1">
+              <span class="absolute inset-y-0 left-0 flex items-center pl-2.5 text-slate-400">
+                <i class="fa-solid fa-barcode text-xs"></i>
+              </span>
+              <input type="text" class="resi-code w-full pl-8 pr-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs font-bold focus:outline-none focus:ring-2 focus:ring-orange-500" 
+                placeholder="Contoh: JP123456789" value="${resiValue}">
+            </div>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div>
+            <label class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Jumlah Item</label>
+            <input type="number" class="resi-item-count w-full mt-1 bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-xs font-semibold focus:outline-none" value="${totalItemCount}">
+          </div>
+          <div>
+            <label class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Qty</label>
+            <input type="number" class="resi-qty w-full mt-1 bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-xs font-semibold focus:outline-none" value="${sumQty}">
+          </div>
+          <div>
+            <label class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Notes</label>
+            <input type="text" class="resi-notes w-full mt-1 bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-xs font-semibold focus:outline-none" value="${notes}">
+          </div>
+        </div>
+      `;
+
+      container.appendChild(block);
+    }
+
+    function removeResiBlockContainer(id) {
+      const el = document.getElementById(id);
+      if (el) {
+        el.remove();
+        // Recalculate Block Titles
+        const list = document.getElementById("resi-containers-list").children;
+        Array.from(list).forEach((child, idx) => {
+          const badge = child.querySelector(".tracking-widest");
+          if (badge) badge.textContent = `BLOCK CONTAINER #${idx + 1}`;
+        });
+      }
+    }
+
+    // --- SAVE PACKER OR SET STATUS VALIDATE PACKER ---
+    async function savePalletPacker(isDraft) {
+      const blockContainer = document.getElementById("resi-containers-list");
+      if (blockContainer.children.length === 0) {
+        Swal.fire("Peringatan", "Minimal harus ada 1 Resi Block Container.", "warning");
+        return;
+      }
+
+      // Read values
+      const resiBlocksData = [];
+      let validationOk = true;
+
+      Array.from(blockContainer.children).forEach(block => {
+        const type = block.querySelector(".resi-type").value;
+        const code = block.querySelector(".resi-code").value.trim();
+        const items = parseInt(block.querySelector(".resi-item-count").value);
+        const qty = parseInt(block.querySelector(".resi-qty").value);
+        const notes = block.querySelector(".resi-notes").value.trim();
+
+        if (!code) {
+          validationOk = false;
+        }
+
+        resiBlocksData.push({ type, code, items, qty, notes });
+      });
+
+      if (!validationOk) {
+        Swal.fire("Peringatan", "Semua nomor resi wajib diisi.", "warning");
+        return;
+      }
+
+      // Loading Alert
+      Swal.fire({
+        title: 'Menyimpan Data...',
+        allowOutsideClick: false,
+        didOpen: () => { Swal.showLoading(); }
+      });
+
+      try {
+        // 1. Delete all previous resis and let cascades do the clean up
+        await fetch(`${SUPABASE_URL}/rest/v1/resi_items?pallet_id=eq.${editingPalletId}`, {
+          method: "DELETE",
+          headers: getHeaders()
+        });
+
+        // 2. Insert new Resi Items & Sub Details
+        for (let data of resiBlocksData) {
+          const payload = {
+            pallet_id: editingPalletId,
+            feedback: data.notes
+          };
+          if (data.type === "RESI_KIRIM") payload.resi_kirim = data.code;
+          else payload.resi_balik = data.code;
+
+          const resiRes = await fetch(`${SUPABASE_URL}/rest/v1/resi_items`, {
+            method: "POST",
+            headers: getHeaders(),
+            body: JSON.stringify(payload)
+          });
+
+          if (!resiRes.ok) throw new Error("Gagal menginput resi item.");
+          const insertedResi = await resiRes.json();
+          const resiId = insertedResi[0].id;
+
+          for (let i = 1; i <= data.items; i++) {
+            await fetch(`${SUPABASE_URL}/rest/v1/resi_details`, {
+              method: "POST",
+              headers: getHeaders(),
+              body: JSON.stringify({
+                resi_item_id: resiId,
+                item_no: "",          // Dibuat kosong / blank total
+                item_name: "",        // Dibuat kosong / blank total
+                qty: ""               // Dibuat kosong / blank total (atau ganti 0 jika kolom DB kamu integer non-null)
+              })
+            });
+          }
+        }
+
+        // 3. Update Pallet Status
+        const nextStatus = isDraft ? "Belum Validasi" : "Validate Packer";
+        await fetch(`${SUPABASE_URL}/rest/v1/pallets?id=eq.${editingPalletId}`, {
+          method: "PATCH",
+          headers: getHeaders(),
+          body: JSON.stringify({ status: nextStatus })
+        });
+
+        closePalletPackerModal();
+        Swal.fire({
+          icon: 'success',
+          title: 'Tersimpan',
+          text: isDraft ? 'Draft Berhasil Tersimpan.' : 'Status Palet Berhasil di-Update ke Validate Packer!',
+          timer: 1500,
+          showConfirmButton: false
+        });
+
+        fetchAllData();
+
+      } catch (err) {
+        Swal.fire({
+          icon: 'error',
+          title: 'Error',
+          text: err.message
+        });
+      }
+    }
+
+
+    // ==============================================================
+    // ADMIN VALIDATION POPUP LOGIC
+    // ==============================================================
+    let currentAdminResisList = []; // Track objects locally inside modal
+    
+    async function openPalletAdminModal(pallet) {
+      const dateString = new Date(pallet.created_at).toLocaleDateString('id-ID', {
+        day: '2-digit', month: '2-digit', year: 'numeric'
+      });
+      document.getElementById("admin-date-display").textContent = dateString;
+      document.getElementById("admin-pallet-display").textContent = pallet.pallet_name;
+
+      const adminResiList = document.getElementById("admin-resi-list");
+      adminResiList.innerHTML = "";
+
+      // Load related resi items
+      currentAdminResisList = localResiItems.filter(r => r.pallet_id === pallet.id);
+
+      currentAdminResisList.forEach((resi, index) => {
+        const isResiBalik = !!resi.resi_balik;
+        const autoResiValue = resi.resi_balik || resi.resi_kirim || "";
+        const targetInputLabel = isResiBalik ? "No Resi Kirim" : "No Resi Balik";
+        
+        // Load details for items
+        const details = localResiDetails.filter(d => d.resi_item_id === resi.id);
+        const resiBlockId = `admin-block-container-${resi.id}`;
+
+        const block = document.createElement("div");
+        block.className = "bg-white p-5 rounded-2xl border border-slate-200 shadow-md space-y-4";
+        block.id = resiBlockId;
+
+        // Topic and DC properties loaded if existing
+        const inputResiLawan = isResiBalik ? (resi.resi_kirim || "") : (resi.resi_balik || "");
+        const noOrder = resi.no_order || "";
+        const topic = resi.topic || "";
+        const feedback = resi.feedback || "";
+        const statusTicket = resi.status_ticket || "";
+        const reason = resi.reason || "";
+        const actionDc = resi.action_dc || "";
+
+        block.innerHTML = `
+          <!-- Block Title Header -->
+          <div class="flex items-center justify-between border-b border-slate-200 pb-2">
+            <span class="text-xs font-bold text-indigo-600 uppercase tracking-widest bg-indigo-50 px-3 py-1 rounded">
+              RESI BLOCK CONTAINER #${index + 1} (${isResiBalik ? 'Resi Balik' : 'Resi Kirim'})
+            </span>
+          </div>
+
+          <!-- BLOK A: INFO UTAMA RESI -->
+          <div class="space-y-3">
+            <h5 class="text-xs font-bold text-slate-800 uppercase tracking-wider flex items-center gap-1.5 border-b border-slate-100 pb-1">
+              <span class="w-1.5 h-1.5 rounded-full bg-indigo-600"></span>
+              <span>[ BLOK A: INFO UTAMA RESI ]</span>
+            </h5>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div>
+                <label class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">No Resi ${isResiBalik ? 'Balik' : 'Kirim'} (Auto)</label>
+                <input type="text" readonly value="${autoResiValue}" class="w-full mt-1 bg-slate-100 border border-slate-200 rounded-lg px-3 py-2 text-xs font-bold text-slate-600 focus:outline-none cursor-not-allowed">
+              </div>
+              <div>
+                <label class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">${targetInputLabel} <span class="text-rose-500">*</span></label>
+                <input type="text" class="admin-input-resi-lawan w-full mt-1 bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-xs font-bold text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500" value="${inputResiLawan}" placeholder="Input ${targetInputLabel}">
+              </div>
+              <div>
+                <label class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">No Order <span class="text-rose-500">*</span></label>
+                <input type="text" class="admin-input-no-order w-full mt-1 bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-xs font-bold text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500" value="${noOrder}" placeholder="Input No Order" onchange="fetchTicketingDataRealtime(this)">
+              </div>
+            </div>
+          </div>
+
+          <!-- BLOK B: DETAIL ITEM -->
+          <div class="space-y-3 pt-2">
+            <div class="flex items-center justify-between border-b border-slate-100 pb-1">
+              <h5 class="text-xs font-bold text-slate-800 uppercase tracking-wider flex items-center gap-1.5">
+                <span class="w-1.5 h-1.5 rounded-full bg-indigo-600"></span>
+                <span>[ BLOK B: DETAIL ITEM ]</span>
+              </h5>
+              <button onclick="addAdminItemRow('${resiBlockId}')" class="px-2 py-1 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 text-[10px] font-bold rounded flex items-center gap-1">
+                <i class="fa-solid fa-plus-circle text-[10px]"></i>
+                <span>Add Item</span>
+              </button>
+            </div>
+            
+            <div class="admin-items-container space-y-2">
+              <!-- Dynamically rendered detailed items rows -->
+            </div>
+          </div>
+
+          <!-- BLOK C: TICKETING & ACTION -->
+          <div class="space-y-3">
+            <h5 class="text-xs font-bold text-slate-800 uppercase tracking-wider flex items-center gap-1.5 border-b border-slate-100 pb-1">
+              <span class="w-1.5 h-1.5 rounded-full bg-indigo-600"></span>
+              <span>[ BLOK C: TICKETING & ACTION ]</span>
+            </h5>
+            <div class="grid grid-cols-1 md:grid-cols-5 gap-4">
+              <div>
+                <label class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Topic</label>
+                <input type="text" id="admin-ticketing-topic" class="w-full bg-slate-100 border border-slate-200 rounded-lg px-3 py-2 text-xs font-semibold text-slate-600 focus:outline-none cursor-not-allowed" placeholder="Otomatis Terisi..." readonly>
+              </div>
+              <div>
+                <label class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Feedback</label>
+                <input type="text" id="admin-ticketing-feedback" class="w-full bg-slate-100 border border-slate-200 rounded-lg px-3 py-2 text-xs font-semibold text-slate-600 focus:outline-none cursor-not-allowed" placeholder="Otomatis Terisi..." readonly>
+              </div>
+              <div>
+                <label class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Status Ticket</label>
+                <input type="text" id="admin-ticketing-status" class="w-full bg-slate-100 border border-slate-200 rounded-lg px-3 py-2 text-xs font-semibold text-slate-600 focus:outline-none cursor-not-allowed" placeholder="Otomatis Terisi..." readonly>
+              </div>
+              <div>
+                <label class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Reason</label>
+                <input type="text" id="admin-ticketing-reason" class="w-full bg-slate-100 border border-slate-200 rounded-lg px-3 py-2 text-xs font-semibold text-slate-600 focus:outline-none cursor-not-allowed" placeholder="Otomatis Terisi..." readonly>
+              </div>
+              <div>
+                <label class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Action DC</label>
+                <input type="text" id="admin-ticketing-action-dc" class="w-full bg-slate-100 border border-slate-200 rounded-lg px-3 py-2 text-xs font-semibold text-slate-600 focus:outline-none cursor-not-allowed" placeholder="Otomatis Terisi..." readonly>
+              </div>
+            </div>
+          </div>
+        `;
+
+        adminResiList.appendChild(block);
+
+        // Inject existing dynamic items inside block
+        const itemsContainer = block.querySelector(".admin-items-container");
+        if (details.length === 0) {
+          // fallback one blank row if empty
+          appendAdminItemRowHtml(itemsContainer);
+        } else {
+          details.forEach(detail => {
+            appendAdminItemRowHtml(itemsContainer, detail);
+          });
+        }
+      });
+
+      document.getElementById("modal-pallet-admin").classList.remove("hidden");
+    }
+
+    function closePalletAdminModal() {
+      document.getElementById("modal-pallet-admin").classList.add("hidden");
+    }
+
+    // Helper to dynamically add items in BLOK B
+    function addAdminItemRow(resiBlockId) {
+      const block = document.getElementById(resiBlockId);
+      if (block) {
+        const container = block.querySelector(".admin-items-container");
+        appendAdminItemRowHtml(container);
+      }
+    }
+
+    // ==========================================
+    // ADMIN DETAIL ITEM ROW GENERATOR & AUTOFILL
+    // ==========================================
+
+    function appendAdminItemRowHtml(container, detailData = null) {
+      const rowId = `admin-item-row-${Date.now()}-${Math.random().toString(36).substr(2, 5)}`;
+      const row = document.createElement("div");
+      
+      row.className = "grid grid-cols-1 md:grid-cols-3 gap-4 items-end bg-slate-50/50 p-4 rounded-xl border border-slate-200/60 relative group";
+      row.id = rowId;
+
+      const itemNo = detailData ? detailData.item_no : "";
+      const itemName = detailData ? detailData.item_name : "";
+      const qty = detailData ? detailData.qty : "";
+
+      row.innerHTML = `
+          <div>
+              <label class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-1">Item No</label>
+              <input type="text" class="admin-detail-item-no w-full bg-white border border-slate-200 rounded-lg px-3 py-2 text-xs font-bold text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500" 
+                  value="${itemNo}" placeholder="Contoh: ITEM-01" onchange="fetchItemNameRealtime('${rowId}')">
+          </div>
+          <div>
+              <label class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-1">Item Name</label>
+              <input type="text" class="admin-detail-item-name w-full bg-slate-100 border border-slate-200 rounded-lg px-3 py-2 text-xs font-semibold text-slate-600 focus:outline-none cursor-not-allowed" 
+                  value="${itemName}" placeholder="Otomatis Terisi..." readonly>
+          </div>
+          <div class="flex items-center gap-2">
+              <div class="flex-1">
+                  <label class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-1">Qty</label>
+                  <input type="number" class="admin-detail-qty w-full bg-white border border-slate-200 rounded-lg px-3 py-2 text-xs font-bold text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500" 
+                  value="${qty}" placeholder="0">
+              </div>
+          </div>
+      `;
+      container.appendChild(row);
+    }
+
+    async function fetchItemNameRealtime(rowId) {
+      const rowElement = document.getElementById(rowId);
+      if (!rowElement) return;
+
+      const itemNoInput = rowElement.querySelector(".admin-detail-item-no");
+      const itemNameInput = rowElement.querySelector(".admin-detail-item-name");
+      const itemNoValue = itemNoInput.value.trim();
+
+      // Jika kolom Item No dikosongkan, bersihkan Item Name
+      if (!itemNoValue) {
+        itemNameInput.value = "";
+        return;
+      }
+
+      try {
+        // Tembak tabel item_all filter kolom "Item No"
+        const response = await fetch(`${SUPABASE_URL}/rest/v1/item_all?Item%20No=eq.${encodeURIComponent(itemNoValue)}&select=Item%20Name`, {
+          method: "GET",
+          headers: getHeaders()
+        });
+
+        if (!response.ok) throw new Error("Gagal mengambil data master.");
+
+        const data = await response.json();
+
+        if (data && data.length > 0) {
+          // Mengambil properti ber-spasi dengan braket ["Item Name"]
+          itemNameInput.value = data[0]["Item Name"] || "";
+        } else {
+          itemNameInput.value = "KODE BARANG TIDAK DITEMUKAN";
+        }
+      } catch (err) {
+        console.error("Auto-fill Error:", err);
+        itemNameInput.value = "Error memuat data master";
+      }
+    }
+    
+
+    // --- FITUR REALTIME AUTO-FILL BLOK C UNTUK MULTI-RESI ---
+    async function fetchTicketingDataRealtime(inputElement) {
+      if (!inputElement) return;
+
+      // Mencari container/block pembungkus resi yang sedang diketik saat ini
+      const blockElement = inputElement.closest('[id^="admin-block-container-"]');
+      if (!blockElement) return;
+
+      // Mencari elemen target Blok C HANYA di dalam container resi yang aktif ini saja
+      const topicInput = blockElement.querySelector("#admin-ticketing-topic") || document.getElementById("admin-ticketing-topic");
+      const feedbackInput = blockElement.querySelector("#admin-ticketing-feedback") || document.getElementById("admin-ticketing-feedback");
+      const statusInput = blockElement.querySelector("#admin-ticketing-status") || document.getElementById("admin-ticketing-status");
+      const reasonInput = blockElement.querySelector("#admin-ticketing-reason") || document.getElementById("admin-ticketing-reason");
+      const actionDcInput = blockElement.querySelector("#admin-ticketing-action-dc") || document.getElementById("admin-ticketing-action-dc");
+
+      const noOrderValue = inputElement.value.trim();
+
+      // Reset field jika input No Order dihapus/kosong
+      if (!noOrderValue) {
+        if (topicInput) topicInput.value = "";
+        if (feedbackInput) feedbackInput.value = "";
+        if (statusInput) statusInput.value = "";
+        if (reasonInput) reasonInput.value = "";
+        if (actionDcInput) actionDcInput.value = "";
+        return;
+      }
+
+      try {
+        const url = `${SUPABASE_URL}/rest/v1/all_task_delvy?No%20Order=eq.${encodeURIComponent(noOrderValue)}&select=Topic,Feedback,Status%20Tiket,Reason,Action%20DC`;
+        
+        const response = await fetch(url, {
+          method: "GET",
+          headers: getHeaders()
+        });
+
+        if (!response.ok) throw new Error("Gagal mengambil data dari all_task_delvy.");
+
+        const data = await response.json();
+
+        if (data && data.length > 0) {
+          const task = data[0];
+          if (topicInput) topicInput.value = task["Topic"] || "";
+          if (feedbackInput) feedbackInput.value = task["Feedback"] || "";
+          if (statusInput) statusInput.value = task["Status Tiket"] || "";
+          if (reasonInput) reasonInput.value = task["Reason"] || "";
+          if (actionDcInput) actionDcInput.value = task["Action DC"] || "";
+        } else {
+          if (topicInput) topicInput.value = "TIDAK DITEMUKAN";
+          if (feedbackInput) feedbackInput.value = "TIDAK DITEMUKAN";
+          if (statusInput) statusInput.value = "TIDAK DITEMUKAN";
+          if (reasonInput) reasonInput.value = "TIDAK DITEMUKAN";
+          if (actionDcInput) actionDcInput.value = "TIDAK DITEMUKAN";
+        }
+      } catch (err) {
+        console.error("Ticketing Multi-Resi Auto-fill Error:", err);
+        if (topicInput) topicInput.value = "Error memuat data";
+      }
+    }
+
+    function removeAdminItemRow(rowId) {
+      const el = document.getElementById(rowId);
+      if (el) el.remove();
+    }
+
+    // --- SAVE ADMIN OR VALIDATE FINAL ---
+    async function savePalletAdmin(isDraft) {
+      // Validation loops
+      let checkValid = true;
+      const updatesList = [];
+
+      for (let resi of currentAdminResisList) {
+        const block = document.getElementById(`admin-block-container-${resi.id}`);
+        if (!block) continue;
+
+        const isResiBalik = !!resi.resi_balik;
+        const resiLawan = block.querySelector(".admin-input-resi-lawan").value.trim();
+        const noOrder = block.querySelector(".admin-input-no-order") ? block.querySelector(".admin-input-no-order").value.trim() : "";
+        
+        // Membaca nilai dari ID Blok C yang baru kita buat agar tidak null/error
+        const topic = document.getElementById("admin-ticketing-topic") ? document.getElementById("admin-ticketing-topic").value.trim() : "";
+        const feedback = document.getElementById("admin-ticketing-feedback") ? document.getElementById("admin-ticketing-feedback").value.trim() : "";
+        const statusTicket = document.getElementById("admin-ticketing-status") ? document.getElementById("admin-ticketing-status").value.trim() : "";
+        const reason = document.getElementById("admin-ticketing-reason") ? document.getElementById("admin-ticketing-reason").value.trim() : "";
+        const actionDc = document.getElementById("admin-ticketing-action-dc") ? document.getElementById("admin-ticketing-action-dc").value.trim() : "";
+
+        // Items detailed mapping inside this container
+        const itemRows = block.querySelectorAll(".admin-items-container > div");
+        const itemsToInsert = [];
+
+        itemRows.forEach(row => {
+          const itemNo = row.querySelector(".admin-detail-item-no").value.trim();
+          const itemName = row.querySelector(".admin-detail-item-name").value.trim();
+          const qty = parseInt(row.querySelector(".admin-detail-qty").value) || 0;
+          if (itemNo || itemName) {
+            itemsToInsert.push({ item_no: itemNo, item_name: itemName, qty: qty });
+          }
+        });
+
+        // Wajib diisi (No Resi lawan dan No Order) hanya jika VALIDATE ADMIN (Bukan Draft)
+        if (!isDraft) {
+          if (!resiLawan || !noOrder) {
+            checkValid = false;
+          }
+        }
+
+        updatesList.push({
+          resiId: resi.id,
+          isResiBalik: isResiBalik,
+          resiLawan: resiLawan,
+          noOrder: noOrder,
+          topic: topic,
+          feedback: feedback,
+          statusTicket: statusTicket,
+          reason: reason,
+          action_dc: actionDc,
+          items: itemsToInsert
+        });
+      }
+
+      if (!checkValid) {
+        Swal.fire("Gagal Validasi", "Nomor resi kirim/balik lawan serta Nomor Order wajib diisi untuk melakukan Validasi Admin.", "error");
+        return;
+      }
+
+      Swal.fire({
+        title: 'Memproses Data...',
+        allowOutsideClick: false,
+        didOpen: () => { Swal.showLoading(); }
+      });
+
+      try {
+        // Save back into Supabase Database
+        for (let data of updatesList) {
+          // 1. Update resi item
+          const payload = {
+            no_order: data.noOrder,
+            topic: data.topic,
+            feedback: data.feedback,
+            status_ticket: data.statusTicket,
+            reason: data.reason,
+            action_dc: data.action_dc
+          };
+          if (data.isResiBalik) {
+            payload.resi_kirim = data.resiLawan;
+          } else {
+            payload.resi_balik = data.resiLawan;
+          }
+
+          const resiPatch = await fetch(`${SUPABASE_URL}/rest/v1/resi_items?id=eq.${data.resiId}`, {
+            method: "PATCH",
+            headers: getHeaders(),
+            body: JSON.stringify(payload)
+          });
+          if (!resiPatch.ok) throw new Error("Gagal mengupdate metrics resi.");
+
+          // 2. Refresh dynamic details items (cascade delete on detail then insert new)
+          await fetch(`${SUPABASE_URL}/rest/v1/resi_details?resi_item_id=eq.${data.resiId}`, {
+            method: "DELETE",
+            headers: getHeaders()
+          });
+
+          // Memperbaiki loop penyimpanan data detail item yang diinput manual oleh Admin
+          for (let item of data.items) {
+            await fetch(`${SUPABASE_URL}/rest/v1/resi_details`, {
+              method: "POST",
+              headers: getHeaders(),
+              body: JSON.stringify({
+                resi_item_id: data.resiId,
+                item_no: item.item_no,
+                item_name: item.item_name,
+                qty: item.qty
+              })
+            });
+          }
+        }
+
+        // 3. Update pallet status
+        const nextStatus = isDraft ? "Validate Packer" : "Validate Admin";
+        await fetch(`${SUPABASE_URL}/rest/v1/pallets?id=eq.${editingPalletId}`, {
+          method: "PATCH",
+          headers: getHeaders(),
+          body: JSON.stringify({ status: nextStatus })
+        });
+
+        closePalletAdminModal();
+        Swal.fire({
+          icon: 'success',
+          title: 'Tersimpan',
+          text: isDraft ? 'Berhasil menyimpan draft Admin.' : 'Sukses! Status pallet tervalidasi oleh Admin.',
+          timer: 1500,
+          showConfirmButton: false
+        });
+
+        fetchAllData();
+
+      } catch (err) {
+        Swal.fire("Error", err.message, "error");
+      }
+    }
+
+
+    // ==============================================================
+    // VALIDATED VIEW MODAL & TARGET TRANSFER CONSOLE
+    // ==============================================================
+    function openValidatedAdminViewModal(pallet) {
+      const dateString = new Date(pallet.created_at).toLocaleDateString('id-ID', {
+        day: '2-digit', month: '2-digit', year: 'numeric'
+      });
+
+      const body = document.getElementById("validated-view-body");
+      body.innerHTML = "";
+
+      // Load related data
+      const relatedResis = localResiItems.filter(r => r.pallet_id === pallet.id);
+
+      relatedResis.forEach((resi, index) => {
+        const details = localResiDetails.filter(d => d.resi_item_id === resi.id);
+        
+        let totalItemsCount = details.length;
+        let sumQty = 0;
+        details.forEach(d => sumQty += (d.qty || 0));
+
+        // Horizontal scrolling items layout block
+        let tableRowsHtml = "";
+        details.forEach(item => {
+          tableRowsHtml += `
+            <tr class="divide-x divide-slate-100">
+              <td class="py-2 px-4 bg-slate-50 font-bold">${item.item_no || '-'}</td>
+              <td class="py-2 px-4">${item.item_name || '-'}</td>
+              <td class="py-2 px-4 text-center font-bold text-orange-600">${item.qty || 0}</td>
+            </tr>
+          `;
+        });
+
+        const card = document.createElement("div");
+        card.className = "bg-white rounded-2xl border border-slate-200/80 shadow-md overflow-hidden relative transition-all hover:ring-2 hover:ring-indigo-600/30";
+        card.innerHTML = `
+          <!-- Header -->
+          <div class="bg-indigo-50/50 px-5 py-3 border-b border-slate-100 flex justify-between items-center text-xs text-slate-500 font-bold">
+            <div>Date: <span class="text-slate-800">${dateString}</span></div>
+            <div>No Palet: <span class="text-indigo-600 font-extrabold">${pallet.pallet_name}</span></div>
+          </div>
+
+          <div class="p-5 space-y-3">
+            <div class="text-xs font-semibold text-slate-600">
+              <p>No Resi Balik: <span class="text-slate-900 font-extrabold">${resi.resi_balik || '-'}</span></p>
+              <p class="mt-1">No Resi Kirim: <span class="text-slate-900 font-extrabold">${resi.resi_kirim || '-'}</span></p>
+              <p class="mt-1">No Order: <span class="text-slate-900 font-extrabold">${resi.no_order || '-'}</span></p>
+            </div>
+
+            <div class="flex gap-4 text-xs font-bold border-t border-b border-slate-100 py-2 bg-slate-50 px-3 rounded-lg">
+              <div>Jml Item: <span class="text-slate-900">${totalItemsCount}</span></div>
+              <div>Qty: <span class="text-slate-900">${sumQty}</span></div>
+            </div>
+
+            <!-- Scrollable Horizontal Sub Table -->
+            <div class="border border-slate-100 rounded-xl overflow-hidden mt-3">
+              <div class="overflow-x-auto">
+                <table class="w-full text-left text-xs">
+                  <thead>
+                    <tr class="bg-slate-100/80 border-b border-slate-200 text-slate-500 font-bold">
+                      <th class="py-2 px-4">Item No</th>
+                      <th class="py-2 px-4">Item Name</th>
+                      <th class="py-2 px-4 text-center">Qty</th>
+                    </tr>
+                  </thead>
+                  <tbody class="divide-y divide-slate-100 text-slate-700 font-medium">
+                    ${tableRowsHtml || '<tr><td colspan="3" class="py-2 px-4 text-center">No Items Available</td></tr>'}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            <!-- Ticketing Horizontal Table -->
+            <div class="border border-slate-100 rounded-xl overflow-hidden mt-3">
+              <div class="overflow-x-auto">
+                <table class="w-full text-left text-xs min-w-[500px]">
+                  <thead>
+                    <tr class="bg-slate-100/80 border-b border-slate-200 text-slate-500 font-bold">
+                      <th class="py-2 px-3">Topic</th>
+                      <th class="py-2 px-3">Feedback</th>
+                      <th class="py-2 px-3">Status Ticket</th>
+                      <th class="py-2 px-3">Reason</th>
+                      <th class="py-2 px-3">Action DC</th>
+                    </tr>
+                  </thead>
+                  <tbody class="text-slate-700 font-medium">
+                    <tr class="divide-x divide-slate-100">
+                      <td class="py-2 px-3">${resi.topic || '-'}</td>
+                      <td class="py-2 px-3">${resi.feedback || '-'}</td>
+                      <td class="py-2 px-3"><span class="px-1.5 py-0.5 bg-slate-100 border border-slate-200 rounded font-bold">${resi.status_ticket || '-'}</span></td>
+                      <td class="py-2 px-3">${resi.reason || '-'}</td>
+                      <td class="py-2 px-3">${resi.action_dc || '-'}</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            <!-- PINDAH PALET TRIGGER -->
+            <button onclick="triggerPindahPalet('${resi.id}')" 
+              class="w-full mt-3 py-3 border-2 border-dashed border-indigo-200 hover:border-indigo-500 hover:bg-indigo-50 rounded-xl flex items-center justify-center gap-2 text-xs font-bold text-indigo-600 transition-all">
+              <i class="fa-solid fa-arrows-spin text-sm"></i>
+              <span>PINDAH PALET (PINDAH MENU ALUR LOGISTIK)</span>
+            </button>
+          </div>
+        `;
+
+        body.appendChild(card);
+      });
+
+      document.getElementById("modal-validated-admin-view").classList.remove("hidden");
+    }
+
+    function closeValidatedAdminViewModal() {
+      document.getElementById("modal-validated-admin-view").classList.add("hidden");
+    }
+
+    // ==============================================================
+    // PERPINDAHAN PALET INTERACTION SYSTEM (SPA WIDGET)
+    // ==============================================================
+    function triggerPindahPalet(resiItemIdString) {
+      // Find the resi_item row object from cache
+      const resiId = parseInt(resiItemIdString);
+      selectedResiItemForPindah = localResiItems.find(r => r.id === resiId);
+      
+      if (!selectedResiItemForPindah) return;
+
+      // Close previous modals
+      closeValidatedAdminViewModal();
+      closeGenericDetailModal();
+
+      // Open transition menu selector modal
+      const btnGrid = document.getElementById("pindah-menu-buttons-grid");
+      btnGrid.innerHTML = "";
+
+      // Setup menu constraints based on where it came from
+      // default: ALL MENUS (VALIDASI_AWAL, BERJALAN, ASURANSI, BANDING_JNE, FISIK_BAGUS, BREAKAGE)
+      let menus = [
+        { code: "BERJALAN", label: "Berjalan", icon: "fa-solid fa-truck-ramp-box", color: "sky" },
+        { code: "BANDING_JNE", label: "Banding JNE", icon: "fa-solid fa-scale-balanced", color: "purple" },
+        { code: "ASURANSI", label: "Asuransi", icon: "fa-solid fa-shield-halved", color: "amber" },
+        { code: "FISIK_BAGUS", label: "Fisik Bagus", icon: "fa-solid fa-box", color: "emerald" },
+        { code: "BREAKAGE", label: "Breakage", icon: "fa-solid fa-burst", color: "rose" }
+      ];
+
+      // CONSTRAINT LOGIC: "Banding JNE" can only move to "Asuransi" or "Breakage"
+      if (activeMenu === "BANDING_JNE") {
+        document.getElementById("pindah-menu-header-title").textContent = "PINDAH MENU (BANDING JNE)";
+        menus = [
+          { code: "ASURANSI", label: "Asuransi", icon: "fa-solid fa-shield-halved", color: "amber" },
+          { code: "BREAKAGE", label: "Breakage", icon: "fa-solid fa-burst", color: "rose" }
+        ];
+      } else {
+        document.getElementById("pindah-menu-header-title").textContent = "PINDAH MENU";
+      }
+
+      menus.forEach(m => {
+        const btn = document.createElement("button");
+        btn.onclick = function() { selectPindahDestinationMenu(m.code); };
+        btn.className = `w-full flex items-center justify-between p-4 bg-${m.color}-50 hover:bg-${m.color}-100 border border-${m.color}-200 rounded-xl transition-all font-bold text-sm text-${m.color}-950 text-left group`;
+        btn.innerHTML = `
+          <div class="flex items-center gap-3">
+            <span class="w-10 h-10 bg-${m.color}-600 text-white rounded-full flex items-center justify-center text-base shadow shadow-${m.color}-600/10 group-hover:scale-105 transition-transform">
+              <i class="${m.icon}"></i>
+            </span>
+            <span>${m.label}</span>
+          </div>
+          <i class="fa-solid fa-chevron-right text-xs opacity-50 group-hover:opacity-100 transition-opacity"></i>
+        `;
+        btnGrid.appendChild(btn);
+      });
+
+      document.getElementById("modal-pindah-menu").classList.remove("hidden");
+    }
+
+    function closePindahMenuModal() {
+      document.getElementById("modal-pindah-menu").classList.add("hidden");
+    }
+
+    // Step 2: Choose Pallet Options
+    function selectPindahDestinationMenu(menuCode) {
+      selectedTargetMenuForPindah = menuCode;
+      closePindahMenuModal();
+      
+      // Open option modal
+      document.getElementById("modal-pallet-option").classList.remove("hidden");
+    }
+
+    function closePalletOptionModal() {
+      document.getElementById("modal-pallet-option").classList.add("hidden");
+    }
+
+    // Step 3: Configure Target (Create New or Append to Existing)
+    async function selectPalletOption(optionType) {
+      selectedTransferType = optionType;
+      closePalletOptionModal();
+
+      const modalExecute = document.getElementById("modal-pindah-execute");
+      const readOnlyMenu = document.getElementById("pindah-execute-menu-readonly");
+      const existingContainer = document.getElementById("pindah-execute-existing-container");
+
+      if (optionType === "NEW") {
+        document.getElementById("pindah-execute-title").textContent = "CREATE NEW PALLET";
+        
+        // Compute running sequence name
+        const computedName = await determineNextPalletName(selectedTargetMenuForPindah);
+        readOnlyMenu.textContent = `${computedName} (Read Only)`;
+        readOnlyMenu.classList.remove("hidden");
+        existingContainer.classList.add("hidden");
+        
+      } else {
+        document.getElementById("pindah-execute-title").textContent = "JOIN EXISTING PALLET";
+        readOnlyMenu.classList.add("hidden");
+        existingContainer.classList.remove("hidden");
+
+        // [LOCK SYSTEM] Saring palet berdasarkan menu_type DAN pastikan statusnya BUKAN "Ready Pickup"
+        const sameMenuPallets = localPallets.filter(p => 
+          p.menu_type === selectedTargetMenuForPindah && 
+          p.status !== "Ready Pickup"
+        );
+        
+        console.log(`[LOCK SYSTEM] Menemukan ${sameMenuPallets.length} palet aktif di menu ${selectedTargetMenuForPindah} (Palet Ready Pickup disembunyikan).`);
+
+        const selector = document.getElementById("pindah-execute-select-pallet");
+        selector.innerHTML = "";
+
+        if (sameMenuPallets.length === 0) {
+          const opt = document.createElement("option");
+          opt.value = "";
+          opt.textContent = "Tidak Ada Palet Terdaftar - Pilih New";
+          selector.appendChild(opt);
+        } else {
+          // Masukkan opsi default paling atas agar user memilih secara sadar
+          const defaultOpt = document.createElement("option");
+          defaultOpt.value = "";
+          defaultOpt.textContent = "-- Pilih Palet Tujuan --";
+          selector.appendChild(defaultOpt);
+
+          sameMenuPallets.forEach(p => {
+            const opt = document.createElement("option");
+            opt.value = p.id;
+            opt.textContent = p.pallet_name;
+            selector.appendChild(opt);
+          });
+        }
+      }
+
+      modalExecute.classList.remove("hidden");
+    }
+
+    function closePindahExecuteModal() {
+      document.getElementById("modal-pindah-execute").classList.add("hidden");
+    }
+
+    // Final Stage Execution: Database operations
+    async function executePindahPaletFinal() {
+      console.log("=== MEMULAI PROSES PERPINDAHAN RESI ===");
+      console.log("Resi yang akan dipindah:", selectedResiItemForPindah);
+      console.log("Target menu tujuan:", selectedTargetMenuForPindah);
+      console.log("Metode pemilihan palet:", selectedTransferType);
+
+      Swal.fire({ 
+        title: 'Mentransfer Data Resi...', 
+        allowOutsideClick: false, 
+        didOpen: () => { Swal.showLoading(); } 
+      });
+
+      try {
+        let targetPalletId = null;
+        let targetPalletName = "";
+        
+        // Menyimpan ID palet asal dan nama palet asal sebelum data resi diubah
+        const originalPalletId = selectedResiItemForPindah.pallet_id;
+        const originalPalletName = localPallets.find(p => p.id === originalPalletId)?.pallet_name || "Unknown Pallet";
+        console.log(`Palet Asal Terdeteksi: ID = ${originalPalletId}, Nama = ${originalPalletName}`);
+
+        // 1. Get or Create target pallet
+        if (selectedTransferType === "NEW") {
+          console.log("Menggunakan opsi NEW PALLET. Menghitung nama urutan palet baru...");
+          const newName = await determineNextPalletName(selectedTargetMenuForPindah);
+          targetPalletName = newName;
+          console.log("Nama palet baru yang digenerate:", targetPalletName);
+
+          console.log("Mengirim request POST ke tabel pallets untuk membuat palet baru...");
+          const palletRes = await fetch(`${SUPABASE_URL}/rest/v1/pallets`, {
+            method: "POST",
+            headers: getHeaders(),
+            body: JSON.stringify({
+              pallet_name: targetPalletName,
+              menu_type: selectedTargetMenuForPindah,
+              status: "Belum Validasi"
+            })
+          });
+
+          if (!palletRes.ok) throw new Error("Gagal membuat palet baru di database.");
+          
+          // Jika database Supabase tidak me-return data, lakukan pencarian ulang data yang barusan dibuat
+          console.log("Palet baru berhasil dibuat di Supabase. Mengambil ID palet yang baru dibuat...");
+          await fetchAllData(); // Refresh data local cache terlebih dahulu
+          const newlyCreatedPallet = localPallets.find(p => p.pallet_name === targetPalletName && p.menu_type === selectedTargetMenuForPindah);
+          if (!newlyCreatedPallet) throw new Error("Gagal membaca ID palet baru dari local cache.");
+          targetPalletId = newlyCreatedPallet.id;
+          
+        } else {
+          console.log("Menggunakan opsi EXISTING PALLET.");
+          const selector = document.getElementById("pindah-execute-select-pallet");
+          targetPalletId = parseInt(selector.value);
+          targetPalletName = selector.options[selector.selectedIndex].text;
+          
+          if (!targetPalletId) throw new Error("Silakan pilih palet existing yang valid.");
+        }
+
+        console.log(`Target Palet Tujuan Terkonfirmasi: ID = ${targetPalletId}, Nama = ${targetPalletName}`);
+
+        // 2. Hitung detail item untuk dimasukkan ke Log History
+        const relatedDetails = localResiDetails.filter(d => d.resi_item_id === selectedResiItemForPindah.id);
+        const firstItemNo = relatedDetails.length > 0 ? relatedDetails[0].item_no : "-";
+        let sumQty = 0;
+        relatedDetails.forEach(d => sumQty += (d.qty || 0));
+        console.log(`Atribut resi dihitung untuk Log: Item No ke-1 = ${firstItemNo}, Total Qty = ${sumQty}`);
+
+        // 3. Update relasi pallet_id pada resi_items ke palet tujuan
+        console.log(`Mengupdate relasi pallet_id pada tabel resi_items untuk ID Resi: ${selectedResiItemForPindah.id} ...`);
+        const moveRes = await fetch(`${SUPABASE_URL}/rest/v1/resi_items?id=eq.${selectedResiItemForPindah.id}`, {
+          method: "PATCH",
+          headers: getHeaders(),
+          body: JSON.stringify({ pallet_id: targetPalletId })
+        });
+
+        if (!moveRes.ok) throw new Error("Gagal memindahkan relasi resi ke palet tujuan.");
+        console.log("Relasi resi_items berhasil diperbarui di Supabase.");
+
+        // 4. Create Audit Log history trace
+        console.log("Mencatat riwayat perpindahan ke tabel audit_logs...");
+        await fetch(`${SUPABASE_URL}/rest/v1/audit_logs`, {
+          method: "POST",
+          headers: getHeaders(),
+          body: JSON.stringify({
+            resi_kirim: selectedResiItemForPindah.resi_kirim || "",
+            resi_balik: selectedResiItemForPindah.resi_balik || "",
+            no_order: selectedResiItemForPindah.no_order || "",
+            no_item: firstItemNo,
+            qty: sumQty,
+            from_pallet: originalPalletName,
+            to_pallet: targetPalletName,
+            username: currentUser.email.split("@")[0].toUpperCase(),
+            remarks: `Memindahkan resi dari palet asal ${originalPalletName} menuju target alur ${targetPalletName}.`,
+            no_sor: selectedResiItemForPindah.no_sor || "",
+            no_psi: selectedResiItemForPindah.no_psi || "",
+            no_psort: selectedResiItemForPindah.no_psort || ""
+          })
+        });
+        console.log("Audit log sukses tersimpan.");
+
+        // ==============================================================
+        // LOGIKA TAMBAHAN SOLUSI A: CEK & HAPUS PALET ASAL JIKA KOSONG
+        // ==============================================================
+        console.log(`[SOLUSI A] Memeriksa sisa resi di palet asal (${originalPalletName})...`);
+        
+        // Filter sisa resi yang masih menggunakan originalPalletId, KECUALI resi yang baru saja kita pindahkan
+        const sisaResiDiPaletAsal = localResiItems.filter(r => r.pallet_id === originalPalletId && r.id !== selectedResiItemForPindah.id);
+        console.log(`Jumlah sisa resi di palet asal: ${sisaResiDiPaletAsal.length} resi.`);
+
+        if (sisaResiDiPaletAsal.length === 0) {
+          console.log(`-> Palet Asal (${originalPalletName}) kini KOSONG! Mengeksekusi perintah DELETE ke Supabase...`);
+          
+          const deletePalletRes = await fetch(`${SUPABASE_URL}/rest/v1/pallets?id=eq.${originalPalletId}`, {
+            method: "DELETE",
+            headers: getHeaders()
+          });
+
+          if (deletePalletRes.ok) {
+            console.log(`-> SUKSES: Palet ${originalPalletName} (ID: ${originalPalletId}) telah dihapus dari database Supabase.`);
+          } else {
+            console.warn(`-> PERINGATAN: Gagal menghapus palet ${originalPalletName} dari database, kode status HTTP: ${deletePalletRes.status}`);
+          }
+        } else {
+          console.log(`-> Palet Asal (${originalPalletName}) masih memiliki resi lain. Penghapusan palet dilewati.`);
+        }
+        // ==============================================================
+
+        // 5. Clean up UI & Refresh Data
+        console.log("Menutup modal perpindahan dan menyegarkan seluruh data UI...");
+        closePindahExecuteModal();
+        
+        Swal.fire({
+          icon: 'success',
+          title: 'Berhasil Pindah Palet',
+          text: `Resi berhasil dialihkan ke ${targetPalletName}.`,
+          timer: 1500,
+          showConfirmButton: false
+        });
+
+        fetchAllData();
+        console.log("=== PROSES PERPINDAHAN RESI SELESAI ===");
+
+      } catch (err) {
+        console.error("CRITICAL ERROR PADA PROSES PERPINDAHAN:", err);
+        Swal.fire("Transfer Gagal", err.message, "error");
+      }
+    }
+
+
+    // ==============================================================
+    // GENERIC MULTI-STEP FLOW VALIDATION MODAL FOR OPERATIONAL MENUS
+    // (BERJALAN, ASURANSI, BANDING_JNE, FISIK_BAGUS, BREAKAGE)
+    // ==============================================================
+    let currentFlowPallet = null;
+    let currentFlowResis = [];
+
+    async function openGenericFlowModal(pallet) {
+      currentFlowPallet = pallet;
+      
+      // Determine configuration visual themes based on active menu
+      const cfg = getMenuConfig(pallet.menu_type);
+      
+      const headerBg = document.getElementById("flow-header-bg");
+      const iconCont = document.getElementById("flow-header-icon-container");
+      const icon = document.getElementById("flow-header-icon");
+      const title = document.getElementById("flow-header-title");
+      const subtitle = document.getElementById("flow-header-subtitle");
+
+      headerBg.className = `bg-slate-900 px-6 py-4 text-white flex justify-between items-center`;
+      iconCont.className = `p-2 rounded-lg text-sm bg-${cfg.color}-600`;
+      icon.className = `${cfg.icon}`;
+      title.textContent = `DETAIL PALET : ${pallet.pallet_name}`;
+      subtitle.textContent = `${pallet.menu_type.replace('_', ' ')} Phase - Status: ${pallet.status}`;
+
+      // Reset & load containers
+      const body = document.getElementById("flow-modal-body");
+      body.innerHTML = "";
+
+      // Load related resis and items
+      currentFlowResis = localResiItems.filter(r => r.pallet_id === pallet.id);
+
+      if (currentFlowResis.length === 0) {
+        body.innerHTML = `
+          <div class="text-center p-8 text-slate-400">
+            <i class="fa-solid fa-triangle-exclamation text-2xl"></i>
+            <p class="text-xs mt-2">Tidak ada data resi terdaftar di palet ini.</p>
+          </div>
+        `;
+        // Only Batal/Close Button
+        setupFlowFooterButtons([]);
+        document.getElementById("modal-generic-detail-flow").classList.remove("hidden");
+        return;
+      }
+
+      currentFlowResis.forEach((resi, index) => {
+        const details = localResiDetails.filter(d => d.resi_item_id === resi.id);
+        const itemNo = details.length > 0 ? details[0].item_no : "-";
+        const itemName = details.length > 0 ? details[0].item_name : "-";
+        let sumQty = 0;
+        details.forEach(d => sumQty += (d.qty || 0));
+
+        const block = document.createElement("div");
+        block.className = "bg-white p-5 rounded-2xl border border-slate-200 shadow-md space-y-4";
+        
+        // Dynamic formulation elements depending on status & menu options
+        const isBelumValidasi = (pallet.status === "Belum Validasi");
+        
+        // Define Inputs Block layout
+        let inputsHtml = "";
+        
+        if (pallet.menu_type === "ASURANSI") {
+          // Asuransi Input Block (Kitting)
+          const kitVal = resi.kitting || "";
+          const isReadOnly = (pallet.status !== "Belum Validasi");
+          
+          inputsHtml = `
+            <div class="pt-2">
+              <p class="text-xs font-bold text-amber-600 uppercase tracking-widest mb-1">[ INPUT TAMBAHAN KHUSUS ASURANSI ]</p>
+              <div class="bg-amber-50/50 p-4 rounded-xl border border-amber-200">
+                <label class="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Kitting yang diambil <span class="text-rose-500">*</span></label>
+                <input type="text" class="asuransi-kit-input w-full mt-1 bg-white border border-slate-200 rounded-lg px-3 py-2 text-xs font-bold text-slate-800 focus:outline-none" 
+                  value="${kitVal}" placeholder="Input teks kitting..." ${isReadOnly ? 'readonly cursor-not-allowed bg-slate-100' : ''}>
+              </div>
+            </div>
+          `;
+
+        } else if (pallet.menu_type === "FISIK_BAGUS") {
+          // Fisik Bagus Inputs (No PSI, No SOR, No PSORT, No Location, Notes)
+          const isReadOnly = (pallet.status !== "Belum Validasi");
+          
+          inputsHtml = `
+            <div class="pt-2">
+              <p class="text-xs font-bold text-emerald-600 uppercase tracking-widest mb-1">[ INPUT TAMBAHAN KHUSUS FISIK BAGUS ]</p>
+              <div class="bg-emerald-50/50 p-4 rounded-xl border border-emerald-200 grid grid-cols-2 md:grid-cols-5 gap-3">
+                <div>
+                  <label class="text-[10px] font-bold text-slate-500">No PSI</label>
+                  <input type="text" class="fisik-input-psi w-full mt-1 bg-white border border-slate-200 rounded px-2 py-1.5 text-xs font-semibold focus:outline-none" value="${resi.no_psi || ''}" ${isReadOnly ? 'readonly bg-slate-100' : ''}>
+                </div>
+                <div>
+                  <label class="text-[10px] font-bold text-slate-500">No SOR</label>
+                  <input type="text" class="fisik-input-sor w-full mt-1 bg-white border border-slate-200 rounded px-2 py-1.5 text-xs font-semibold focus:outline-none" value="${resi.no_sor || ''}" ${isReadOnly ? 'readonly bg-slate-100' : ''}>
+                </div>
+                <div>
+                  <label class="text-[10px] font-bold text-slate-500">No PSORT</label>
+                  <input type="text" class="fisik-input-psort w-full mt-1 bg-white border border-slate-200 rounded px-2 py-1.5 text-xs font-semibold focus:outline-none" value="${resi.no_psort || ''}" ${isReadOnly ? 'readonly bg-slate-100' : ''}>
+                </div>
+                <div>
+                  <label class="text-[10px] font-bold text-slate-500">No Location</label>
+                  <input type="text" class="fisik-input-loc w-full mt-1 bg-white border border-slate-200 rounded px-2 py-1.5 text-xs font-semibold focus:outline-none" value="${resi.no_location || ''}" ${isReadOnly ? 'readonly bg-slate-100' : ''}>
+                </div>
+                <div>
+                  <label class="text-[10px] font-bold text-slate-500">Notes</label>
+                  <input type="text" class="fisik-input-notes w-full mt-1 bg-white border border-slate-200 rounded px-2 py-1.5 text-xs font-semibold focus:outline-none" value="${resi.feedback || ' '}" ${isReadOnly ? 'readonly bg-slate-100' : ''}>
+                </div>
+              </div>
+            </div>
+          `;
+
+        } else if (pallet.menu_type === "BREAKAGE") {
+          // Breakage Inputs (No PSI, No SOR, No PSORT, No Location, Notes)
+          const isReadOnly = (pallet.status !== "Belum Validasi");
+          
+          inputsHtml = `
+            <div class="pt-2">
+              <p class="text-xs font-bold text-rose-600 uppercase tracking-widest mb-1">[ DETAIL ADMINISTRATION ]</p>
+              <div class="bg-rose-50/50 p-4 rounded-xl border border-rose-200 grid grid-cols-2 md:grid-cols-5 gap-3">
+                <div>
+                  <label class="text-[10px] font-bold text-slate-500">No PSI</label>
+                  <input type="text" class="breakage-input-psi w-full mt-1 bg-white border border-slate-200 rounded px-2 py-1.5 text-xs font-semibold focus:outline-none" value="${resi.no_psi || ''}" ${isReadOnly ? 'readonly bg-slate-100' : ''}>
+                </div>
+                <div>
+                  <label class="text-[10px] font-bold text-slate-500">No SOR</label>
+                  <input type="text" class="breakage-input-sor w-full mt-1 bg-white border border-slate-200 rounded px-2 py-1.5 text-xs font-semibold focus:outline-none" value="${resi.no_sor || ''}" ${isReadOnly ? 'readonly bg-slate-100' : ''}>
+                </div>
+                <div>
+                  <label class="text-[10px] font-bold text-slate-500">No PSORT</label>
+                  <input type="text" class="breakage-input-psort w-full mt-1 bg-white border border-slate-200 rounded px-2 py-1.5 text-xs font-semibold focus:outline-none" value="${resi.no_psort || ''}" ${isReadOnly ? 'readonly bg-slate-100' : ''}>
+                </div>
+                <div>
+                  <label class="text-[10px] font-bold text-slate-500">No Location</label>
+                  <input type="text" class="breakage-input-loc w-full mt-1 bg-white border border-slate-200 rounded px-2 py-1.5 text-xs font-semibold focus:outline-none" value="${resi.no_location || ''}" ${isReadOnly ? 'readonly bg-slate-100' : ''}>
+                </div>
+                <div>
+                  <label class="text-[10px] font-bold text-slate-500">Notes</label>
+                  <input type="text" class="breakage-input-notes w-full mt-1 bg-white border border-slate-200 rounded px-2 py-1.5 text-xs font-semibold focus:outline-none" value="${resi.feedback || ' '}" ${isReadOnly ? 'readonly bg-slate-100' : ''}>
+                </div>
+              </div>
+            </div>
+          `;
+        }
+
+        block.innerHTML = `
+          <!-- Block Title Header -->
+          <div class="flex items-center justify-between border-b border-slate-100 pb-2">
+            <span class="text-xs font-extrabold text-${cfg.color}-600 uppercase tracking-widest bg-${cfg.color}-50 px-3 py-1 rounded">
+              BLOK RESI #${index + 1}
+            </span>
+          </div>
+
+          <!-- INFO RESI READONLY -->
+          <div class="grid grid-cols-2 md:grid-cols-4 gap-4 text-xs font-semibold text-slate-600 bg-slate-50 p-4 rounded-xl border border-slate-200/50">
+            <div>
+              <p class="text-[9px] text-slate-400 uppercase tracking-wider mb-0.5">No Palet</p>
+              <p class="text-slate-900 font-extrabold">${pallet.pallet_name}</p>
+            </div>
+            <div>
+              <p class="text-[9px] text-slate-400 uppercase tracking-wider mb-0.5">No Resi Balik</p>
+              <p class="text-slate-900 font-extrabold">${resi.resi_balik || '-'}</p>
+            </div>
+            <div>
+              <p class="text-[9px] text-slate-400 uppercase tracking-wider mb-0.5">No Resi Kirim</p>
+              <p class="text-slate-900 font-extrabold">${resi.resi_kirim || '-'}</p>
+            </div>
+            <div>
+              <p class="text-[9px] text-slate-400 uppercase tracking-wider mb-0.5">No Order</p>
+              <p class="text-slate-900 font-extrabold">${resi.no_order || '-'}</p>
+            </div>
+          </div>
+
+          <!-- BARANG DI DALAM RESI -->
+          <div class="space-y-2">
+            <p class="text-xs font-bold text-slate-700 uppercase tracking-wider flex items-center gap-1.5 border-b border-slate-100 pb-1">
+              <span class="w-1.5 h-1.5 rounded-full bg-slate-400"></span>
+              <span>[ BARANG DI DALAM RESI ]</span>
+            </p>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs font-semibold text-slate-600">
+              <div>
+                <span class="text-[9px] text-slate-400 uppercase tracking-wider">Item No</span>
+                <p class="text-slate-900 mt-0.5">${itemNo}</p>
+              </div>
+              <div>
+                <span class="text-[9px] text-slate-400 uppercase tracking-wider">Item Name</span>
+                <p class="text-slate-900 mt-0.5">${itemName}</p>
+              </div>
+              <div>
+                <span class="text-[9px] text-slate-400 uppercase tracking-wider">Qty</span>
+                <p class="text-slate-900 mt-0.5">${sumQty}</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- ATRIBUT DC -->
+          <div class="space-y-2 pt-1">
+            <p class="text-xs font-bold text-slate-700 uppercase tracking-wider flex items-center gap-1.5 border-b border-slate-100 pb-1">
+              <span class="w-1.5 h-1.5 rounded-full bg-slate-400"></span>
+              <span>[ DETAIL TICKET & ATRIBUT DC ]</span>
+            </p>
+            <div class="grid grid-cols-2 md:grid-cols-5 gap-3 text-xs font-semibold text-slate-600">
+              <div>
+                <span class="text-[9px] text-slate-400 uppercase tracking-wider">Topic</span>
+                <p class="text-slate-900 mt-0.5">${resi.topic || '-'}</p>
+              </div>
+              <div>
+                <span class="text-[9px] text-slate-400 uppercase tracking-wider">Feedback</span>
+                <p class="text-slate-900 mt-0.5">${resi.feedback || '-'}</p>
+              </div>
+              <div>
+                <span class="text-[9px] text-slate-400 uppercase tracking-wider">Status Ticket</span>
+                <p class="text-slate-900 mt-0.5"><span class="px-1.5 py-0.5 bg-slate-100 border border-slate-200 rounded font-bold">${resi.status_ticket || '-'}</span></p>
+              </div>
+              <div>
+                <span class="text-[9px] text-slate-400 uppercase tracking-wider">Reason</span>
+                <p class="text-slate-900 mt-0.5">${resi.reason || '-'}</p>
+              </div>
+              <div>
+                <span class="text-[9px] text-slate-400 uppercase tracking-wider">Action DC</span>
+                <p class="text-slate-900 mt-0.5">${resi.action_dc || '-'}</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Injected dynamic fields -->
+          ${inputsHtml}
+        `;
+
+        // Store reference to raw elements so we can extract inputs dynamically
+        block.dataset.resiId = resi.id;
+        body.appendChild(block);
+      });
+
+      // Setup dynamic operations buttons in flow modal footer
+      setupFlowFooterButtons(pallet);
+
+      document.getElementById("modal-generic-detail-flow").classList.remove("hidden");
+    }
+
+    function closeGenericDetailModal() {
+      document.getElementById("modal-generic-detail-flow").classList.add("hidden");
+    }
+
+    // Helper Configuration
+    function getMenuConfig(menu) {
+      if (menu === "BERJALAN") return { color: "sky", icon: "fa-solid fa-truck-ramp-box" };
+      if (menu === "ASURANSI") return { color: "amber", icon: "fa-solid fa-shield-halved" };
+      if (menu === "BANDING_JNE") return { color: "purple", icon: "fa-solid fa-scale-balanced" };
+      if (menu === "FISIK_BAGUS") return { color: "emerald", icon: "fa-solid fa-box" };
+      if (menu === "BREAKAGE") return { color: "rose", icon: "fa-solid fa-burst" };
+      return { color: "slate", icon: "fa-solid fa-cube" };
+    }
+
+    // Dynamic Multi-Step Button Generator depending on conditions
+    function setupFlowFooterButtons(pallet) {
+      const footer = document.getElementById("flow-modal-footer");
+      footer.innerHTML = "";
+
+      // Back Button (Close) is always present
+      const btnBatal = document.createElement("button");
+      btnBatal.onclick = closeGenericDetailModal;
+      btnBatal.className = "px-5 py-2.5 bg-white hover:bg-slate-100 border border-slate-200 rounded-xl text-sm font-semibold text-slate-600 transition-all flex items-center gap-2";
+      btnBatal.innerHTML = `<i class="fa-solid fa-xmark"></i> <span>BATAL</span>`;
+      footer.appendChild(btnBatal);
+
+      const menu = pallet.menu_type;
+      const status = pallet.status;
+
+      const rightDiv = document.createElement("div");
+      rightDiv.className = "flex gap-3";
+
+      // ----------------- BERJALAN & BANDING JNE MENU FLOW -----------------
+      if (menu === "BERJALAN" || menu === "BANDING_JNE") {
+        if (status === "Belum Validasi") {
+          // Confirm Button (Merubah status jadi Done Check)
+          const btnConfirm = document.createElement("button");
+          btnConfirm.onclick = function() { executeStatusTransition(pallet, "Done Check"); };
+          btnConfirm.className = "px-5 py-2.5 bg-sky-600 hover:bg-sky-500 text-white rounded-xl text-sm font-semibold transition-all flex items-center gap-2 shadow";
+          btnConfirm.innerHTML = `<i class="fa-solid fa-circle-check"></i> <span>CONFIRM</span>`;
+          rightDiv.appendChild(btnConfirm);
+
+          // Pindah Palet Button
+          const btnPindah = document.createElement("button");
+          btnPindah.onclick = function() { triggerPindahPalet(currentFlowResis[0].id); };
+          btnPindah.className = "px-5 py-2.5 bg-slate-800 hover:bg-slate-700 text-white rounded-xl text-sm font-semibold transition-all flex items-center gap-2";
+          btnPindah.innerHTML = `<i class="fa-solid fa-arrows-spin"></i> <span>PINDAH PALET</span>`;
+          rightDiv.appendChild(btnPindah);
+
+        } else if (status === "Done Check") {
+          // Hanya PINDAH PALET
+          const btnPindah = document.createElement("button");
+          btnPindah.onclick = function() { triggerPindahPalet(currentFlowResis[0].id); };
+          btnPindah.className = "px-5 py-2.5 bg-orange-600 hover:bg-orange-500 text-white rounded-xl text-sm font-semibold transition-all flex items-center gap-2 shadow";
+          btnPindah.innerHTML = `<i class="fa-solid fa-arrows-spin"></i> <span>PINDAH PALET</span>`;
+          rightDiv.appendChild(btnPindah);
+        }
+      }
+
+      // ----------------- ASURANSI MENU FLOW -----------------
+      else if (menu === "ASURANSI") {
+        if (status === "Belum Validasi") {
+          // Simpan Draft
+          const btnSave = document.createElement("button");
+          btnSave.onclick = function() { saveAsuransiFlow(pallet, "Belum Validasi"); };
+          btnSave.className = "px-5 py-2.5 bg-slate-800 hover:bg-slate-700 text-white rounded-xl text-sm font-semibold transition-all";
+          btnSave.textContent = "SIMPAN";
+          rightDiv.appendChild(btnSave);
+
+          // Confirm (Ubah ke Ready Pickup)
+          const btnConfirm = document.createElement("button");
+          btnConfirm.onclick = function() { saveAsuransiFlow(pallet, "Ready Pickup"); };
+          btnConfirm.className = "px-5 py-2.5 bg-amber-600 hover:bg-amber-500 text-white rounded-xl text-sm font-semibold transition-all shadow";
+          btnConfirm.textContent = "CONFIRM";
+          rightDiv.appendChild(btnConfirm);
+
+        } else if (status === "Ready Pickup") {
+          // Finish (Ubah ke Done Pickup)
+          const btnFinish = document.createElement("button");
+          btnFinish.onclick = function() { executeStatusTransition(pallet, "Done Pickup"); };
+          btnFinish.className = "px-5 py-2.5 bg-teal-600 hover:bg-teal-500 text-white rounded-xl text-sm font-semibold transition-all shadow";
+          btnFinish.textContent = "FINISH";
+          rightDiv.appendChild(btnFinish);
+        }
+        // Kondisi 3: Done Pickup (murni view, no buttons)
+      }
+
+      // ----------------- FISIK BAGUS MENU FLOW -----------------
+      else if (menu === "FISIK_BAGUS") {
+        if (status === "Belum Validasi") {
+          // Simpan Draft
+          const btnSave = document.createElement("button");
+          btnSave.onclick = function() { saveFisikFlow(pallet, "Belum Validasi"); };
+          btnSave.className = "px-5 py-2.5 bg-slate-800 hover:bg-slate-700 text-white rounded-xl text-sm font-semibold transition-all";
+          btnSave.textContent = "SIMPAN";
+          rightDiv.appendChild(btnSave);
+
+          // Confirm (Ubah ke Done Return)
+          const btnConfirm = document.createElement("button");
+          btnConfirm.onclick = function() { saveFisikFlow(pallet, "Done Return"); };
+          btnConfirm.className = "px-5 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-sm font-semibold transition-all shadow";
+          btnConfirm.textContent = "CONFIRM";
+          rightDiv.appendChild(btnConfirm);
+
+        } else if (status === "Done Return") {
+          // Done Balik Lokasi (Ubah ke Done Balik Lokasi)
+          const btnFinish = document.createElement("button");
+          btnFinish.onclick = function() { executeStatusTransition(pallet, "Done Balik Lokasi"); };
+          btnFinish.className = "px-5 py-2.5 bg-green-600 hover:bg-green-500 text-white rounded-xl text-sm font-semibold transition-all shadow";
+          btnFinish.textContent = "DONE BALIK LOKASI";
+          rightDiv.appendChild(btnFinish);
+        }
+        // Kondisi 3: Done Balik Lokasi (view only)
+      }
+
+      // ----------------- BREAKAGE MENU FLOW -----------------
+      else if (menu === "BREAKAGE") {
+        if (status === "Belum Validasi") {
+          // Simpan Draft
+          const btnSave = document.createElement("button");
+          btnSave.onclick = function() { saveBreakageFlow(pallet, "Belum Validasi"); };
+          btnSave.className = "px-5 py-2.5 bg-slate-800 hover:bg-slate-700 text-white rounded-xl text-sm font-semibold transition-all";
+          btnSave.textContent = "SIMPAN";
+          rightDiv.appendChild(btnSave);
+
+          // Confirm (Ubah ke Breakage)
+          const btnConfirm = document.createElement("button");
+          btnConfirm.onclick = function() { saveBreakageFlow(pallet, "Breakage"); };
+          btnConfirm.className = "px-5 py-2.5 bg-rose-600 hover:bg-rose-500 text-white rounded-xl text-sm font-semibold transition-all shadow";
+          btnConfirm.textContent = "CONFIRM";
+          rightDiv.appendChild(btnConfirm);
+
+        } else if (status === "Breakage") {
+          // Done Pemusnahan (Ubah ke Done Pemusnahan)
+          const btnFinish = document.createElement("button");
+          btnFinish.onclick = function() { executeStatusTransition(pallet, "Done Pemusnahan"); };
+          btnFinish.className = "px-5 py-2.5 bg-rose-900 hover:bg-rose-800 text-white rounded-xl text-sm font-semibold transition-all shadow";
+          btnFinish.textContent = "DONE PEMUSNAHAN";
+          rightDiv.appendChild(btnFinish);
+        }
+        // Kondisi 3: Done Pemusnahan (view only)
+      }
+
+      footer.appendChild(rightDiv);
+    }
+
+    // --- TRANSITION SAVER FOR SPECIAL INPUTS ---
+    async function saveAsuransiFlow(pallet, targetStatus) {
+      const modalBody = document.getElementById("flow-modal-body");
+      const blocks = modalBody.children;
+      
+      Swal.fire({ title: 'Menyimpan...', allowOutsideClick: false, didOpen: () => { Swal.showLoading(); } });
+
+      try {
+        for (let block of blocks) {
+          const resiId = block.dataset.resiId;
+          const kitVal = block.querySelector(".asuransi-kit-input").value.trim();
+
+          if (targetStatus === "Ready Pickup" && !kitVal) {
+            throw new Error("Field 'Kitting yang diambil' wajib diisi sebelum melakukan Confirm.");
+          }
+
+          const res = await fetch(`${SUPABASE_URL}/rest/v1/resi_items?id=eq.${resiId}`, {
+            method: "PATCH",
+            headers: getHeaders(),
+            body: JSON.stringify({ kitting: kitVal })
+          });
+          if (!res.ok) throw new Error("Gagal menyimpan data kitting.");
+        }
+
+        // Update pallet status
+        await fetch(`${SUPABASE_URL}/rest/v1/pallets?id=eq.${pallet.id}`, {
+          method: "PATCH",
+          headers: getHeaders(),
+          body: JSON.stringify({ status: targetStatus })
+        });
+
+        closeGenericDetailModal();
+        Swal.fire({ icon: 'success', title: 'Sukses', text: `Data asuransi berhasil di-update ke status ${targetStatus}.`, timer: 1200, showConfirmButton: false });
+        fetchAllData();
+
+      } catch (err) {
+        Swal.fire("Gagal", err.message, "error");
+      }
+    }
+
+    async function saveFisikFlow(pallet, targetStatus) {
+      const modalBody = document.getElementById("flow-modal-body");
+      const blocks = modalBody.children;
+
+      Swal.fire({ title: 'Menyimpan...', allowOutsideClick: false, didOpen: () => { Swal.showLoading(); } });
+
+      try {
+        for (let block of blocks) {
+          const resiId = block.dataset.resiId;
+          const psi = block.querySelector(".fisik-input-psi").value.trim();
+          const sor = block.querySelector(".fisik-input-sor").value.trim();
+          const psort = block.querySelector(".fisik-input-psort").value.trim();
+          const loc = block.querySelector(".fisik-input-loc").value.trim();
+          const notes = block.querySelector(".fisik-input-notes").value.trim();
+
+          const res = await fetch(`${SUPABASE_URL}/rest/v1/resi_items?id=eq.${resiId}`, {
+            method: "PATCH",
+            headers: getHeaders(),
+            body: JSON.stringify({
+              no_psi: psi,
+              no_sor: sor,
+              no_psort: psort,
+              no_location: loc,
+              feedback: notes
+            })
+          });
+          if (!res.ok) throw new Error("Gagal mengupdate atribut fisik bagus.");
+        }
+
+        await fetch(`${SUPABASE_URL}/rest/v1/pallets?id=eq.${pallet.id}`, {
+          method: "PATCH",
+          headers: getHeaders(),
+          body: JSON.stringify({ status: targetStatus })
+        });
+
+        closeGenericDetailModal();
+        Swal.fire({ icon: 'success', title: 'Sukses', text: `Atribut fisik bagus disimpan dengan status ${targetStatus}.`, timer: 1200, showConfirmButton: false });
+        fetchAllData();
+
+      } catch (err) {
+        Swal.fire("Gagal", err.message, "error");
+      }
+    }
+
+    async function saveBreakageFlow(pallet, targetStatus) {
+      const modalBody = document.getElementById("flow-modal-body");
+      const blocks = modalBody.children;
+
+      Swal.fire({ title: 'Menyimpan...', allowOutsideClick: false, didOpen: () => { Swal.showLoading(); } });
+
+      try {
+        for (let block of blocks) {
+          const resiId = block.dataset.resiId;
+          const psi = block.querySelector(".breakage-input-psi").value.trim();
+          const sor = block.querySelector(".breakage-input-sor").value.trim();
+          const psort = block.querySelector(".breakage-input-psort").value.trim();
+          const loc = block.querySelector(".breakage-input-loc").value.trim();
+          const notes = block.querySelector(".breakage-input-notes").value.trim();
+
+          const res = await fetch(`${SUPABASE_URL}/rest/v1/resi_items?id=eq.${resiId}`, {
+            method: "PATCH",
+            headers: getHeaders(),
+            body: JSON.stringify({
+              no_psi: psi,
+              no_sor: sor,
+              no_psort: psort,
+              no_location: loc,
+              feedback: notes
+            })
+          });
+          if (!res.ok) throw new Error("Gagal mengupdate atribut breakage.");
+        }
+
+        await fetch(`${SUPABASE_URL}/rest/v1/pallets?id=eq.${pallet.id}`, {
+          method: "PATCH",
+          headers: getHeaders(),
+          body: JSON.stringify({ status: targetStatus })
+        });
+
+        closeGenericDetailModal();
+        Swal.fire({ icon: 'success', title: 'Sukses', text: `Data breakage disimpan dengan status ${targetStatus}.`, timer: 1200, showConfirmButton: false });
+        fetchAllData();
+
+      } catch (err) {
+        Swal.fire("Gagal", err.message, "error");
+      }
+    }
+
+    // --- QUICK STATUS TRANSITIONS WITHOUT METRIC SAVES ---
+    async function executeStatusTransition(pallet, targetStatus) {
+      Swal.fire({ title: 'Mengubah Status...', allowOutsideClick: false, didOpen: () => { Swal.showLoading(); } });
+
+      try {
+        const response = await fetch(`${SUPABASE_URL}/rest/v1/pallets?id=eq.${pallet.id}`, {
+          method: "PATCH",
+          headers: getHeaders(),
+          body: JSON.stringify({ status: targetStatus })
+        });
+
+        if (!response.ok) throw new Error("Gagal mengubah status di database.");
+
+        closeGenericDetailModal();
+        
+        Swal.fire({
+          icon: 'success',
+          title: 'Status Diperbarui',
+          text: `Status Palet ${pallet.pallet_name} berganti ke ${targetStatus}.`,
+          timer: 1500,
+          showConfirmButton: false
+        });
+
+        fetchAllData();
+
+      } catch (err) {
+        Swal.fire("Error", err.message, "error");
+      }
+    }
+  </script>
+</body>
+</html>
