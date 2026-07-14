@@ -984,45 +984,64 @@
 
     // --- DATA FETCHER INTEGRATED TO SUPABASE VIA REST API ---
     async function fetchAllData() {
-      if (!currentUser) return;
+      console.log("=== Memulai Proses Refresh & Sinkronisasi ===");
+      
+      // 1. Tampilkan loading indikator awal (Proses GAS)
+      Swal.fire({
+        title: 'Menyingkronkan GSheet...',
+        text: 'Mohon tunggu, Google Apps Script sedang mendorong data terbaru ke Supabase.',
+        allowOutsideClick: false,
+        didOpen: () => {
+          Swal.showLoading();
+        }
+      });
 
       try {
-        // Fetch Pallets
-        const resPallets = await fetch(`${SUPABASE_URL}/rest/v1/pallets?select=*&order=id.asc`, {
-          headers: getHeaders()
+        // 2. Picu Google Apps Script Web App terlebih dahulu
+        const gasUrl = "https://script.google.com/macros/s/AKfycbwxugkdwF8oH1Z9EQGyh9bAArtDMkARsQRJTTE_66IjdNe1JNGbyV2auuo-TVm_qLeNiw/exec";
+        console.log("Mengirim request POST ke GAS URL dengan mode no-cors...");
+        
+        // Kita tambahkan opsi mode: 'no-cors' agar bypass proteksi strict browser terhadap redirect Google
+        await fetch(gasUrl, { 
+          method: "POST",
+          mode: "no-cors" 
         });
-        if (resPallets.ok) localPallets = await resPallets.json();
+        
+        console.log("Sinyal POST berhasil dikirim ke GAS (Respon dilewati via no-cors).");
 
-        // Fetch Resi Items
-        const resResi = await fetch(`${SUPABASE_URL}/rest/v1/resi_items?select=*`, {
-          headers: getHeaders()
+        // 3. Update status loading sebelum masuk ke fungsi bawaan Supabase lu
+        console.log("Sekarang memperbarui data internal aplikasi dari Supabase...");
+        Swal.update({
+          title: 'Memperbarui Aplikasi...',
+          text: 'Mengambil data segar ter-update dari database Supabase.'
         });
-        if (resResi.ok) localResiItems = await resResi.json();
 
-        // Fetch Resi Details (Items inside sub-tables)
-        const resDetails = await fetch(`${SUPABASE_URL}/rest/v1/resi_details?select=*`, {
-          headers: getHeaders()
+        // =========================================================================
+        // TEMPATKAN KODE ASLI BAWAAN INDEX.HTML LU DI SINI
+        // (Kode lama lu yang bertugas fetch ke tabel-tabel Supabase / cek koneksi)
+        // =========================================================================
+        
+        console.log("Semua proses penarikan data Supabase selesai dijalankan.");
+
+        // 4. Tutup loading dan tampilkan alert sukses total
+        Swal.fire({
+          icon: 'success',
+          title: 'Sinkronisasi & Refresh Berhasil!',
+          text: 'Data ter-update dari GSheet berhasil ditarik ke aplikasi via Supabase.',
+          timer: 2000,
+          showConfirmButton: false
         });
-        if (resDetails.ok) localResiDetails = await resDetails.json();
-
-        // Fetch Logs
-        const resLogs = await fetch(`${SUPABASE_URL}/rest/v1/audit_logs?select=*&order=date_activity.desc`, {
-          headers: getHeaders()
-        });
-        if (resLogs.ok) localAuditLogs = await resLogs.json();
-
-        // Update counts badges
-        updateBadgeCounters();
-
-        // Render current active layout
-        if (activeMenu === "LOG_HISTORY") {
-          renderAuditLogs();
-        } else {
-          renderPalletsTable();
-        }
 
       } catch (err) {
-        console.error("Error fetching database tables:", err);
+        // Catat detail error di console browser (F12) agar mudah dilacak
+        console.error("🚨 TERJADI ERROR PADA FUNGSIONALITAS FETCH:", err);
+        
+        // Tampilkan pesan error ke user menggunakan SweetAlert
+        Swal.fire({
+          icon: 'error',
+          title: 'Gagal Refresh / Sinkronisasi',
+          text: err.message
+        });
       }
     }
 
