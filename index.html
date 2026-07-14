@@ -264,7 +264,7 @@
               <span>Database Connected</span>
             </div>
             <!-- Sync Data Button -->
-            <button onclick="fetchAllData()" class="p-2 text-slate-500 hover:text-slate-800 hover:bg-slate-100 rounded-full transition-all" title="Refresh Data">
+            <button onclick="syncAndRefreshData()" class="p-2 text-slate-500 hover:text-slate-800 hover:bg-slate-100 rounded-full transition-all" title="Refresh Data">
               <i class="fa-solid fa-rotate text-sm"></i>
             </button>
           </div>
@@ -984,9 +984,53 @@
 
     // --- DATA FETCHER INTEGRATED TO SUPABASE VIA REST API ---
     async function fetchAllData() {
-      console.log("=== Memulai Proses Refresh & Sinkronisasi ===");
+      if (!currentUser) return;
+
+      try {
+        // Fetch Pallets
+        const resPallets = await fetch(`${SUPABASE_URL}/rest/v1/pallets?select=*&order=id.asc`, {
+          headers: getHeaders()
+        });
+        if (resPallets.ok) localPallets = await resPallets.json();
+
+        // Fetch Resi Items
+        const resResi = await fetch(`${SUPABASE_URL}/rest/v1/resi_items?select=*`, {
+          headers: getHeaders()
+        });
+        if (resResi.ok) localResiItems = await resResi.json();
+
+        // Fetch Resi Details (Items inside sub-tables)
+        const resDetails = await fetch(`${SUPABASE_URL}/rest/v1/resi_details?select=*`, {
+          headers: getHeaders()
+        });
+        if (resDetails.ok) localResiDetails = await resDetails.json();
+
+        // Fetch Logs
+        const resLogs = await fetch(`${SUPABASE_URL}/rest/v1/audit_logs?select=*&order=date_activity.desc`, {
+          headers: getHeaders()
+        });
+        if (resLogs.ok) localAuditLogs = await resLogs.json();
+
+        // Update counts badges
+        updateBadgeCounters();
+
+        // Render current active layout
+        if (activeMenu === "LOG_HISTORY") {
+          renderAuditLogs();
+        } else {
+          renderPalletsTable();
+        }
+
+      } catch (err) {
+        console.error("Error fetching database tables:", err);
+      }
+    }
+
+    // --- FUNGSI KHUSUS TOMBOL REFRESH DATA (Memicu GAS + Panggil Fetcher Asli) ---
+    async function syncAndRefreshData() {
+      console.log("=== Memulai Proses Sinkronisasi GAS ke Supabase ===");
       
-      // 1. Tampilkan loading indikator awal (Proses GAS)
+      // 1. Tampilkan loading SweetAlert
       Swal.fire({
         title: 'Menyingkronkan GSheet...',
         text: 'Mohon tunggu, Google Apps Script sedang mendorong data terbaru ke Supabase.',
@@ -997,33 +1041,26 @@
       });
 
       try {
-        // 2. Picu Google Apps Script Web App terlebih dahulu
+        // 2. Picu GAS Web App
         const gasUrl = "https://script.google.com/macros/s/AKfycbwxugkdwF8oH1Z9EQGyh9bAArtDMkARsQRJTTE_66IjdNe1JNGbyV2auuo-TVm_qLeNiw/exec";
-        console.log("Mengirim request POST ke GAS URL dengan mode no-cors...");
+        console.log("Mengirim request POST ke GAS URL...");
         
-        // Kita tambahkan opsi mode: 'no-cors' agar bypass proteksi strict browser terhadap redirect Google
         await fetch(gasUrl, { 
           method: "POST",
           mode: "no-cors" 
         });
-        
-        console.log("Sinyal POST berhasil dikirim ke GAS (Respon dilewati via no-cors).");
+        console.log("Sinyal POST berhasil dikirim ke GAS.");
 
-        // 3. Update status loading sebelum masuk ke fungsi bawaan Supabase lu
-        console.log("Sekarang memperbarui data internal aplikasi dari Supabase...");
+        // 3. Ubah pesan loading, lalu panggil fungsi fetch asli lu untuk muat tabel Supabase
         Swal.update({
           title: 'Memperbarui Aplikasi...',
           text: 'Mengambil data segar ter-update dari database Supabase.'
         });
 
-        // =========================================================================
-        // TEMPATKAN KODE ASLI BAWAAN INDEX.HTML LU DI SINI
-        // (Kode lama lu yang bertugas fetch ke tabel-tabel Supabase / cek koneksi)
-        // =========================================================================
-        
-        console.log("Semua proses penarikan data Supabase selesai dijalankan.");
+        console.log("Memanggil data fetcher asli Supabase...");
+        await fetchAllData(); 
 
-        // 4. Tutup loading dan tampilkan alert sukses total
+        // 4. Tutup loading dan tampilkan alert sukses
         Swal.fire({
           icon: 'success',
           title: 'Sinkronisasi & Refresh Berhasil!',
@@ -1033,13 +1070,10 @@
         });
 
       } catch (err) {
-        // Catat detail error di console browser (F12) agar mudah dilacak
-        console.error("🚨 TERJADI ERROR PADA FUNGSIONALITAS FETCH:", err);
-        
-        // Tampilkan pesan error ke user menggunakan SweetAlert
+        console.error("🚨 TERJADI ERROR PADA FUNGSIONALITAS REFRESH:", err);
         Swal.fire({
           icon: 'error',
-          title: 'Gagal Refresh / Sinkronisasi',
+          title: 'Gagal Sinkronisasi',
           text: err.message
         });
       }
