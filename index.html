@@ -1279,12 +1279,12 @@
       });
     }
 
-    // --- AUTO NUMBER PALLET SEQUENCING (C1-Cxx) ---
+    // --- AUTO NUMBER PALLET SEQUENCING (C1-Cxx atau MENU X) ---
     async function determineNextPalletName(menu) {
       console.log(`[LOCK SYSTEM] Menghitung nama palet otomatis untuk menu: ${menu}`);
       
       if (menu === "VALIDASI_AWAL") {
-        // Logika untuk Validasi Awal (C1, C2, dst) tetap sama seperti kodemu
+        // Logika untuk Validasi Awal (C1, C2, dst)
         let slot = 1;
         while (true) {
           const name = `C${slot}`;
@@ -1293,15 +1293,14 @@
           slot++;
         }
       } else {
-        // --- UNTUK MENU LAIN (ASURANSI, BERJALAN, DSB) ---
-        // Cari semua palet di menu tersebut
+        // --- UNTUK MENU LAIN (ASURANSI, BERJALAN, BANDING_JNE, DLL) ---
         const menuPallets = localPallets.filter(p => p.menu_type === menu);
         
         if (menuPallets.length === 0) {
           return `${menu} 1`;
         }
 
-        // Ambil angka counter terbesar dari nama palet yang ada
+        // Ambil angka counter terbesar dari nama palet yang ada di menu tersebut
         let maxNum = 0;
         menuPallets.forEach(p => {
           const match = p.pallet_name.match(/\d+$/);
@@ -1311,18 +1310,10 @@
           }
         });
 
-        // Cek status dari palet dengan nomor terbesar tersebut
-        const latestPallet = menuPallets.find(p => p.pallet_name === `${menu} ${maxNum}`);
-        
-        // JIKA palet nomor terbesar tersebut statusnya sudah "Ready Pickup", 
-        // MAKA nomor urutan harus dipaksa naik (+1) ke nomor berikutnya!
-        if (latestPallet && latestPallet.status === "Ready Pickup") {
-          console.log(`[LOCK SYSTEM] Palet ${latestPallet.pallet_name} berstatus Ready Pickup (Terkunci). Menaikkan counter ke urutan berikutnya.`);
-          return `${menu} ${maxNum + 1}`;
-        }
-
-        // Jika belum "Ready Pickup", bisa gunakan nomor yang sudah ada atau sesuai logika bawaanmu
-        return `${menu} ${maxNum}`;
+        // JIKA USER MEMBUAT PALET BARU (NEW), LANGSUNG GENERATE NOMOR BERIKUTNYA (+1)
+        const nextNum = maxNum + 1;
+        console.log(`[LOCK SYSTEM] Menemukan urutan terbesar ${maxNum}. Membuat urutan baru: ${menu} ${nextNum}`);
+        return `${menu} ${nextNum}`;
       }
     }
 
@@ -2278,7 +2269,7 @@
       selectedTargetMenuForPindah = menuCode;
       closePindahMenuModal();
       
-      // Open option modal
+      // Buka modal opsi pallet (NEW atau EXISTING)
       document.getElementById("modal-pallet-option").classList.remove("hidden");
     }
 
